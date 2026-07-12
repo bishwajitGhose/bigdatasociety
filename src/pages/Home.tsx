@@ -1,0 +1,398 @@
+import { useState } from "react";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+import { ArrowRight, Mail, Github, Linkedin, MapPin, Database, Activity, ShieldAlert, Cpu, HeartHandshake, CloudLightning, Leaf, Shield, User } from "lucide-react";
+import { getBlogPosts } from "@/lib/content";
+
+const realLifeApps = [
+  { title: "Healthcare", desc: "Predicting disease outbreaks, spotting patient risk earlier, and helping hospitals plan for demand before it hits.", Icon: Activity },
+  { title: "Climate Change", desc: "Tracking emissions, modeling rising temperatures, and helping researchers see climate patterns years before they're obvious.", Icon: CloudLightning },
+  { title: "Agriculture", desc: "Predicting crop yields, detecting drought risk early, and helping farmers make better planting decisions with satellite and weather data.", Icon: Leaf },
+  { title: "Food Security", desc: "Forecasting shortages before they happen and helping organizations get food where it is needed most.", Icon: HeartHandshake },
+  { title: "Finance", desc: "Catching fraud in real time, assessing credit risk fairly, and powering the algorithms behind everyday banking.", Icon: Shield },
+  { title: "Education", desc: "Spotting which students are struggling early, personalizing learning, and helping schools use resources better.", Icon: User },
+  { title: "Social Media", desc: "Understanding public sentiment, tracking misinformation, and studying how information (and misinformation) spreads.", Icon: Database },
+  { title: "Transportation", desc: "Optimizing delivery routes, predicting traffic, and powering the ride-share apps we all use without thinking twice.", Icon: Cpu },
+  { title: "Smart Cities", desc: "Managing energy grids, reducing waste, and making public services more responsive to what people actually need.", Icon: MapPin },
+  { title: "Public Health", desc: "Tracking disease spread, planning vaccine distribution, and identifying at-risk communities before a crisis hits.", Icon: ShieldAlert },
+];
+
+export default function Home() {
+  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+
+  // Load latest 3 blog articles from markdown
+  const latestPosts = getBlogPosts().slice(0, 3);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setFormState({ name: "", email: "", message: "" });
+    setTimeout(() => setSubmitted(false), 5000);
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-700 selection:bg-teal-500/20 selection:text-teal-900 font-sans">
+      <Navbar />
+
+      <main className="flex-1">
+        {/* ── SECTION 1: HERO / PROFILE ── */}
+        <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-32 border-b border-teal-100 bg-gradient-to-br from-yellow-100/40 via-teal-50/50 to-cyan-100/40">
+          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.4))]" />
+          <div className="container max-w-7xl mx-auto px-6 md:px-10 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              {/* Left text column */}
+              <div className="lg:col-span-8 space-y-6">
+                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100">
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                  Learning in Public
+                </span>
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-tight">
+                  Hi, I'm Jon Neo 👋
+                </h1>
+                <p className="text-xl md:text-2xl text-teal-600 font-medium tracking-tight">
+                  Big Data & Analytics Enthusiast | Aspiring Data Analyst
+                </p>
+                <div className="space-y-4 text-base md:text-lg text-slate-650 leading-relaxed font-light max-w-3xl">
+                  <p>
+                    I'm a beginner data analyst who's genuinely obsessed with what data can tell us — from why crops fail in one region and not another, to how hospitals can predict outbreaks before they spread. This site is where I share the projects I've built, the tools I'm learning, and the things I'm figuring out along the way.
+                  </p>
+                  <p>
+                    I'm not going to pretend I know everything. I'm learning in public, and I think that's actually a good thing — you get to see real progress, real mistakes, and real growth.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <Button asChild size="lg" className="h-12 px-8 rounded-full bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-all shadow-lg shadow-teal-100">
+                    <Link href="/data-projects">View My Projects</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="h-12 px-8 rounded-full border-slate-200 bg-white/40 text-slate-700 hover:text-teal-600 hover:bg-white hover:border-teal-200 transition-all">
+                    <a href="#contact">Let's Talk</a>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right Profile Photo Column */}
+              <div className="lg:col-span-4 flex justify-center">
+                <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden shadow-xl bg-transparent">
+                  <img
+                    src="/images/headshot.jpg"
+                    alt="Jon Neo Profile Photo"
+                    className="w-full h-full object-cover rounded-full filter grayscale contrast-105 hover:grayscale-0 transition-all duration-700"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 2: SKILLS SUMMARY / TECHNOLOGIES I USE ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-tr from-teal-100/30 via-yellow-50/20 to-emerald-100/30">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+              <div className="lg:col-span-5">
+                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Stack</span>
+                <h2 className="text-3xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
+                  What I'm good at<br />(and still getting better at)
+                </h2>
+              </div>
+              <div className="lg:col-span-7 space-y-6 text-slate-600 font-light leading-relaxed">
+                <p>
+                  I work mostly with <strong className="font-semibold text-slate-900">Python, R, and SQL</strong> to clean, explore, and make sense of messy real-world data. I'm learning the Big Data side of things — tools like <strong className="font-semibold text-slate-900">Apache Spark, Kafka, and MongoDB</strong> — because I want to understand how data works at scale, not just in a spreadsheet. On the visualization side, I use <strong className="font-semibold text-slate-900">ggplot2, Matplotlib, and Power BI</strong> to turn numbers into something people can actually understand at a glance.
+                </p>
+                <p>
+                  I'm also picking up web development skills (<strong className="font-semibold text-slate-900">React, Next.js, Node.js</strong>) because I want to be able to build and host my own dashboards and tools, not just hand off a Jupyter notebook and hope for the best.
+                </p>
+                
+                <div className="pt-6 border-t border-teal-150 border-teal-200/50">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Tools &amp; Technologies</div>
+                  <div className="flex flex-wrap gap-2">
+                    {["Python", "R", "SQL", "Apache Spark", "Apache Kafka", "MongoDB", "Elasticsearch", "ggplot2", "Power BI", "React", "Next.js", "Node.js", "PostgreSQL", "Git & GitHub"].map((tool) => (
+                      <span key={tool} className="px-3.5 py-1.5 bg-white/70 text-slate-650 hover:text-teal-650 hover:text-teal-700 text-xs font-semibold rounded-full border border-teal-100/50 transition-colors shadow-sm">
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 3: WHY BIG DATA IS THE FUTURE ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-r from-yellow-100/35 via-emerald-50/20 to-cyan-100/35">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-8 space-y-6">
+                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Philosophy</span>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+                  Why I think Big Data actually matters
+                </h2>
+                <div className="space-y-4 text-slate-600 font-light leading-relaxed text-base md:text-lg">
+                  <p>
+                    We're generating more data every single day than existed in all of human history before the internet. That's not a fun fact — it's a huge opportunity, and honestly, a huge responsibility. The organizations (and countries) that figure out how to use that data well are going to solve problems the rest of us are still stuck on.
+                  </p>
+                  <p>
+                    Big Data isn't just a buzzword for tech companies anymore. It's how doctors catch diseases earlier, how farmers know exactly when to plant, how cities cut down traffic, and how we might actually get ahead of the next pandemic instead of reacting to it. I want to be part of that — even in a small way.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 4: MY PASSION FOR BIG DATA ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-br from-teal-50/40 via-yellow-105 via-yellow-100/25 to-cyan-50/40">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+              <div className="lg:col-span-4">
+                <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Drive</span>
+                <h2 className="text-3xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
+                  Why I got into this in the first place
+                </h2>
+              </div>
+              <div className="lg:col-span-8 space-y-6 text-slate-600 font-light leading-relaxed text-base md:text-lg">
+                <p>
+                  Honestly? I got hooked the first time I pulled a messy public health dataset, cleaned it up, and saw a pattern nobody had pointed out to me — it just showed up in the numbers. That feeling of "oh wait, THAT'S what's actually happening" is addictive.
+                </p>
+                <p>
+                  I care a lot about using data for things that matter — health, food security, climate, education — not just ad clicks and sales funnels (though I get why those matter too). Most of my personal projects lean toward real-world, real-impact problems, especially ones affecting developing countries, because that's where I think good data work can genuinely change outcomes for people.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 5: WHERE BIG DATA SHOWS UP IN REAL LIFE ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-tr from-cyan-100/30 via-emerald-100/25 to-yellow-100/30">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="mb-14 text-center lg:text-left">
+              <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Impact</span>
+              <h2 className="text-3xl font-black text-slate-900 mt-2">
+                It's everywhere — here's what I mean
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {realLifeApps.map((app, idx) => (
+                <div key={idx} className="p-6 rounded-3xl bg-white/70 backdrop-blur-md border border-white/95 shadow-md shadow-slate-100/40 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300">
+                  <div className="space-y-4">
+                    <div className="h-10 w-10 rounded-xl bg-teal-50 border border-teal-100/50 flex items-center justify-center text-teal-650 text-teal-600">
+                      <app.Icon className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900">{app.title}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed font-light">{app.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 6: FEATURED PROJECTS ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-br from-yellow-100/35 via-teal-50/25 to-cyan-100/35">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
+              <div>
+                <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Portfolio</span>
+                <h2 className="text-3xl font-black text-slate-900 mt-2">Some of the projects I'm proud of</h2>
+              </div>
+              <Button asChild variant="link" className="text-teal-600 hover:text-teal-800 font-bold self-start p-0">
+                <Link href="/data-projects">View All Projects <ArrowRight className="w-4 h-4 ml-1" /></Link>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Predicting Child Mortality Using Ghana DHS Data",
+                  desc: "A machine learning model built on real health survey data to identify risk factors and predict child mortality outcomes.",
+                  tech: ["Python", "Machine Learning", "Scikit-Learn"]
+                },
+                {
+                  title: "Global Food Security Forecasting",
+                  desc: "Using World Bank data to forecast food insecurity trends across regions and flag areas of concern.",
+                  tech: ["R", "Time Series", "ggplot2"]
+                },
+                {
+                  title: "Climate Change Sentiment Analysis from YouTube Comments",
+                  desc: "Scraped and analyzed thousands of YouTube comments to understand how public opinion on climate change is shifting.",
+                  tech: ["Python", "FastAPI", "Transformers"]
+                }
+              ].map((proj, idx) => (
+                <div key={idx} className="group p-8 rounded-3xl bg-white/70 backdrop-blur-md border border-white/95 flex flex-col justify-between hover:shadow-xl hover:shadow-slate-100/40 hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-teal-600 transition-colors duration-300">{proj.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed font-light">{proj.desc}</p>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {proj.tech.map((t) => (
+                        <span key={t} className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-full border border-slate-200/40">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-8 pt-4 border-t border-slate-100">
+                    <Link href="/data-projects" className="inline-flex items-center text-xs font-bold text-teal-600 hover:text-teal-800">
+                      View Project <ArrowRight className="w-3.5 h-3.5 ml-1.5 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 7: LATEST FROM THE BLOG ── */}
+        <section className="py-24 border-b border-teal-100 bg-gradient-to-r from-teal-100/35 via-yellow-100/25 to-emerald-100/35">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
+              <div>
+                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Writing</span>
+                <h2 className="text-3xl font-black text-slate-900 mt-2">What I've been writing about lately</h2>
+              </div>
+              <Button asChild variant="link" className="text-teal-600 hover:text-teal-800 font-bold self-start p-0">
+                <Link href="/blog">Read All Articles <ArrowRight className="w-4 h-4 ml-1" /></Link>
+              </Button>
+            </div>
+
+            {latestPosts.length === 0 ? (
+              <div className="text-center py-16 bg-white/60 backdrop-blur-md rounded-3xl border border-slate-200">
+                <p className="text-slate-500 font-light">No blog posts found. Check back soon!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {latestPosts.map((post, idx) => (
+                  <Link key={idx} href={`/blog/${post.slug}`} className="block h-full">
+                    <article className="group flex flex-col justify-between rounded-3xl bg-white/70 backdrop-blur-md hover:bg-white hover:-translate-y-1 hover:shadow-xl border border-white/95 transition-all duration-300 overflow-hidden h-full">
+                      <div>
+                        <div className="aspect-video w-full overflow-hidden relative">
+                          <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" />
+                        </div>
+                        <div className="p-6 space-y-3">
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold">
+                            <span className="text-teal-600 uppercase tracking-wide">{post.category}</span>
+                            <span>{post.readTime}</span>
+                          </div>
+                          <h3 className="text-base font-bold text-slate-900 group-hover:text-teal-600 transition-colors duration-300 line-clamp-2">{post.title}</h3>
+                          <p className="text-xs text-slate-500 leading-relaxed font-light line-clamp-3">{post.desc}</p>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── SECTION 8: CONTACT ── */}
+        <section id="contact" className="py-24 bg-gradient-to-tr from-cyan-100/40 via-emerald-50/35 to-yellow-100/40">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+              {/* Form Column */}
+              <div className="lg:col-span-7 space-y-8">
+                <div>
+                  <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Connect</span>
+                  <h2 className="text-3xl md:text-4xl font-black text-slate-900 mt-2">Let's talk</h2>
+                  <p className="text-slate-500 font-light mt-4 leading-relaxed">
+                    I'm actively looking for opportunities in data analytics and I'd genuinely love to hear from you — whether that's about a job, an internship, a collaboration, or you just want to talk about a cool dataset you found. I try to reply to everyone.
+                  </p>
+                </div>
+
+                {submitted ? (
+                  <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+                    Thank you! Your message has been sent successfully. I will get back to you shortly.
+                  </div>
+                ) : (
+                  <form onSubmit={handleFormSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <input
+                          id="name"
+                          type="text"
+                          required
+                          value={formState.name}
+                          onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/95 border border-teal-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-sm text-slate-900 transition-all shadow-sm placeholder:text-slate-400"
+                          placeholder="Name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <input
+                          id="email"
+                          type="email"
+                          required
+                          value={formState.email}
+                          onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/95 border border-teal-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-sm text-slate-900 transition-all shadow-sm placeholder:text-slate-400"
+                          placeholder="Email"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <textarea
+                        id="message"
+                        rows={5}
+                        required
+                        value={formState.message}
+                        onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/95 border border-teal-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-sm text-slate-900 transition-all resize-none shadow-sm placeholder:text-slate-400"
+                        placeholder="Message"
+                      />
+                    </div>
+                    <Button type="submit" size="lg" className="px-8 h-12 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-full shadow-lg shadow-teal-100 w-full sm:w-auto">
+                      Send Message
+                    </Button>
+                  </form>
+                )}
+              </div>
+
+              {/* Direct Info Column */}
+              <div className="lg:col-span-5 flex flex-col justify-between gap-12">
+                <div className="p-8 rounded-3xl bg-white/80 backdrop-blur-md border border-white/95 shadow-lg shadow-slate-100/50 space-y-6">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Direct Contact</div>
+                  
+                  <div className="space-y-4">
+                    <a href="mailto:jon@bigdatasociety.ca" className="flex items-center gap-4 text-slate-650 hover:text-teal-600 transition-colors group">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-teal-600 transition-colors">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">jon@bigdatasociety.ca</span>
+                    </a>
+
+                    <a href="https://linkedin.com/in/jonneo" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-slate-650 hover:text-teal-600 transition-colors group">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-teal-600 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">linkedin.com/in/jonneo</span>
+                    </a>
+
+                    <a href="https://github.com/jonneo" target="_blank" rel="noreferrer" className="flex items-center gap-4 text-slate-650 hover:text-teal-600 transition-colors group">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-teal-600 transition-colors">
+                        <Github className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium">github.com/jonneo</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 text-slate-500 font-light p-4">
+                  <MapPin className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-semibold text-slate-800 text-sm">Based in Toronto, Canada</div>
+                    <div className="text-xs mt-1 text-slate-500">Open to remote work and relocation.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

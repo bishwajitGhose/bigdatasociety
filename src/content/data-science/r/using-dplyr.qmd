@@ -1,0 +1,128 @@
+---
+title: "Cutting Through Data: A Practical Guide to dplyr::slice() in R"
+author: "Social Capital Research Institute"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    css: styles.css
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+![](https://images.unsplash.com/photo-1647736070366-09ca6936f727?q=80&w=1600&auto=format&fit=crop){fig-align="center"}
+
+## Introduction
+
+There’s a quiet moment in data analysis when everything feels too big—too many rows, too much noise. You don’t want everything. You want something precise.
+
+That’s where `slice()` from **dplyr** comes in. It gives you direct control over rows by position.
+
+---
+
+## Video Tutorial
+
+{{< video https://www.youtube.com/watch?v=S0wPf9BI520 >}}
+
+---
+
+## Setup
+
+```{r}
+library(dplyr)
+
+df <- tibble(
+  id = 1:10,
+  name = c("A","B","C","D","E","F","G","H","I","J"),
+  score = c(50, 60, 55, 70, 65, 80, 75, 90, 85, 95)
+)
+
+df
+```
+
+---
+
+## Basic Usage
+
+```{r}
+# select first row
+df %>% slice(1)
+
+# select specific rows
+df %>% slice(2, 5, 7)
+
+# select a range
+df %>% slice(1:3)
+```
+
+---
+
+## Removing Rows
+
+```{r}
+# remove first row
+df %>% slice(-1)
+
+# remove first three rows
+df %>% slice(-(1:3))
+```
+
+---
+
+## Grouped Data
+
+```{r}
+df %>%
+  mutate(group = ifelse(id <= 5, "A", "B")) %>%
+  group_by(group) %>%
+  slice(1)
+```
+
+---
+
+## Helper Functions
+
+```{r}
+# first n rows
+df %>% slice_head(n = 3)
+
+# last n rows
+df %>% slice_tail(n = 3)
+
+# highest values
+df %>% slice_max(order_by = score, n = 3)
+
+# lowest values
+df %>% slice_min(order_by = score, n = 3)
+
+# random sample
+df %>% slice_sample(n = 3)
+```
+
+---
+
+## Real Use Case
+
+```{r}
+df %>%
+  mutate(group = ifelse(id <= 5, "A", "B")) %>%
+  group_by(group) %>%
+  slice_max(order_by = score, n = 2)
+```
+
+---
+
+## Key Takeaway
+
+- `filter()` → selects rows by condition  
+- `slice()` → selects rows by position  
+
+That difference is small—but powerful.
+
+---
+
+## Closing
+
+`slice()` is simple, but once you start using it, it becomes one of those tools you reach for constantly. It gives you control over the structure of your data without overcomplicating things.
