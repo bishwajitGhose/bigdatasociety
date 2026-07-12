@@ -250,8 +250,9 @@ export default function BlogPostDetail() {
                     </a>
                   );
                 },
-                code: ({ className, children, inline, ...props }) => {
-                  const isInline = Boolean(inline);
+                code: ({ className, children, ...props }) => {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const isInline = !match;
                   if (isInline) {
                     return (
                       <code className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-[0.9em]" {...props}>

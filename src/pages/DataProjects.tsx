@@ -112,9 +112,6 @@ export default function DataProjects() {
         {/* Intro Header Section */}
         <section className="pt-28 pb-16 md:pt-36 md:pb-24 border-b border-slate-100/80 dark:border-slate-800/80">
           <div className="container max-w-7xl mx-auto px-6 md:px-10">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 mb-6">
-              Engineering Showcase
-            </span>
             <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 dark:text-slate-100 mb-6 animate-fade-in">
               Data Projects Portfolio
             </h1>

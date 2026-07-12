@@ -3,7 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Mail, MapPin, Clock, CheckCircle2, Send, ChevronDown,
+  Mail, Clock, CheckCircle2, Send, ChevronDown,
   Linkedin, Github, ArrowRight
 } from "lucide-react";
 
@@ -80,7 +80,6 @@ export default function Contact() {
           </div>
           <div className="relative container max-w-7xl mx-auto px-6 md:px-10">
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-violet-500 mb-4">Contact</p>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-5 leading-tight">
                 Let's build something<br />
                 <span className="bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">
@@ -143,30 +142,25 @@ export default function Contact() {
                     noValidate
                     data-testid="contact-form"
                   >
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Send a message</h2>
 
                     {/* Name + Email */}
                     <div className="grid sm:grid-cols-2 gap-5">
-                      <Field
-                        label="Name"
-                        error={errors.name}
-                        htmlFor="contact-name"
-                      >
+                      <Field error={errors.name}>
                         <input
                           id="contact-name"
                           type="text"
-                          placeholder="Jane Doe"
+                          placeholder="Name"
                           value={form.name}
                           onChange={(e) => handleChange("name", e.target.value)}
                           data-testid="input-contact-name"
                           className={inputCls(!!errors.name)}
                         />
                       </Field>
-                      <Field label="Email" error={errors.email} htmlFor="contact-email">
+                      <Field error={errors.email}>
                         <input
                           id="contact-email"
                           type="email"
-                          placeholder="jane@example.com"
+                          placeholder="Email"
                           value={form.email}
                           onChange={(e) => handleChange("email", e.target.value)}
                           data-testid="input-contact-email"
@@ -176,18 +170,18 @@ export default function Contact() {
                     </div>
 
                     {/* Project type */}
-                    <Field label="Project type" error={errors.projectType} htmlFor="contact-project">
+                    <Field error={errors.projectType}>
                       <div className="relative">
                         <select
                           id="contact-project"
                           value={form.projectType}
                           onChange={(e) => handleChange("projectType", e.target.value)}
                           data-testid="input-contact-project"
-                          className={`${inputCls(!!errors.projectType)} appearance-none pr-10`}
+                          className={`${inputCls(!!errors.projectType)} appearance-none pr-10 ${!form.projectType ? 'text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-slate-100'}`}
                         >
-                          <option value="">Select a category…</option>
+                          <option value="" disabled hidden>Project type</option>
                           {projectTypes.map((t) => (
-                            <option key={t} value={t}>{t}</option>
+                            <option key={t} value={t} className="text-slate-900 dark:text-slate-100">{t}</option>
                           ))}
                         </select>
                         <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -195,11 +189,11 @@ export default function Contact() {
                     </Field>
 
                     {/* Budget (optional) */}
-                    <Field label={<>Budget <span className="text-slate-400 font-normal">(optional)</span></>} htmlFor="contact-budget">
+                    <Field>
                       <input
                         id="contact-budget"
                         type="text"
-                        placeholder="e.g. $5k–$20k, open to discuss"
+                        placeholder="Budget (optional)"
                         value={form.budget}
                         onChange={(e) => handleChange("budget", e.target.value)}
                         data-testid="input-contact-budget"
@@ -208,11 +202,11 @@ export default function Contact() {
                     </Field>
 
                     {/* Message */}
-                    <Field label="Message" error={errors.message} htmlFor="contact-message">
+                    <Field error={errors.message}>
                       <textarea
                         id="contact-message"
                         rows={5}
-                        placeholder="Describe what you're building, the challenge you're facing, or the outcome you need…"
+                        placeholder="Message"
                         value={form.message}
                         onChange={(e) => handleChange("message", e.target.value)}
                         data-testid="input-contact-message"
@@ -226,24 +220,26 @@ export default function Contact() {
                     </Field>
 
                     {/* Submit */}
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      data-testid="btn-contact-submit"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-700 shadow-md shadow-violet-200 dark:shadow-violet-900 group"
-                    >
-                      {loading ? (
-                        <>
-                          <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                          Sending…
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                          Send message
-                        </>
-                      )}
-                    </button>
+                    <div className="flex justify-center w-full pt-2">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        data-testid="btn-contact-submit"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-700 shadow-md shadow-violet-200 dark:shadow-violet-900 group"
+                      >
+                        {loading ? (
+                          <>
+                            <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                            Sending…
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            Send message
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </motion.form>
                 )}
               </AnimatePresence>
@@ -261,10 +257,10 @@ export default function Contact() {
               >
                 <div className="flex items-center gap-2 mb-4">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-500" />
                   </span>
-                  <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Accepting inquiries</span>
+                  <span className="text-sm font-semibold text-violet-600 dark:text-violet-400">Accepting inquiries</span>
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                   Currently available for new engagements starting next month.
@@ -281,15 +277,11 @@ export default function Contact() {
                 style={{ boxShadow: "0 4px 24px -4px rgba(0,0,0,0.08)" }}
               >
                 <InfoRow icon={Mail} label="Email">
-                  <a href="mailto:jon@infoart.ca" className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline">
-                    jon@infoart.ca
+                  <a href="mailto:gb@infoart.ca" className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline">
+                    gb@infoart.ca
                   </a>
                 </InfoRow>
-                <InfoRow icon={MapPin} label="Location">
-                  <span className="text-sm text-slate-600 dark:text-slate-300">
-                    North America · Remote-first
-                  </span>
-                </InfoRow>
+
                 <InfoRow icon={Clock} label="Response time">
                   <span className="text-sm text-slate-600 dark:text-slate-300">Within 24 hours</span>
                 </InfoRow>
@@ -334,29 +326,7 @@ export default function Contact() {
                 </div>
               </motion.div>
 
-              {/* Preferred work */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.45 }}
-                className="rounded-2xl p-7 bg-gradient-to-br from-violet-600 to-indigo-600 text-white"
-                style={{ boxShadow: "0 8px 32px -8px rgba(109,40,217,0.4)" }}
-              >
-                <p className="text-xs font-semibold uppercase tracking-wider text-violet-200 mb-3">I work best on</p>
-                <ul className="space-y-2">
-                  {[
-                    "Complex data pipeline architecture",
-                    "Statistical modeling & inference",
-                    "Dashboard & visualization design",
-                    "Full-stack data apps with React",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-violet-100">
-                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-violet-300 flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+
             </aside>
 
           </div>
@@ -383,21 +353,14 @@ function inputCls(hasError: boolean) {
 }
 
 function Field({
-  label,
   error,
-  htmlFor,
   children,
 }: {
-  label: React.ReactNode;
   error?: string;
-  htmlFor: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-        {label}
-      </label>
+    <div className="space-y-1">
       {children}
       <AnimatePresence>
         {error && (
@@ -406,7 +369,7 @@ function Field({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.25 }}
-            className="text-xs text-rose-500 dark:text-rose-400 font-medium"
+            className="text-xs text-rose-500 dark:text-rose-400 font-medium pl-2"
           >
             {error}
           </motion.p>

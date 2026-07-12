@@ -6,116 +6,64 @@ import { ArrowRight, Clock, Search, X } from "lucide-react";
 
 const posts = [
   {
-    title: "Mastering ggplot2: Beyond the Defaults",
-    excerpt: "How to strip away chart junk and create publication-ready visual narratives using R's premier visualization library.",
-    date: "Oct 12, 2023",
-    readTime: "8 min read",
-    category: "Visualization",
-    accent: "from-violet-500 to-purple-500",
-    accentBg: "bg-violet-50",
-    accentText: "text-violet-700",
-  },
-  {
-    title: "Spark Tuning for Massive Scale",
-    excerpt: "A deep dive into partition strategies, avoiding shuffles, and optimizing memory allocation when processing terabytes of data.",
-    date: "Sep 05, 2023",
-    readTime: "12 min read",
-    category: "Data Engineering",
+    title: "Apache Spark Partitioning & Shuffle Tuning",
+    excerpt: "A complete walkthrough showing how spark partition tuning impacts resource usage and runtime execution metrics.",
+    date: "Jan 15, 2026",
+    readTime: "15 min video",
+    category: "Big Data",
     accent: "from-orange-400 to-amber-500",
     accentBg: "bg-orange-50",
     accentText: "text-orange-700",
   },
   {
-    title: "Tableau Best Practices for Executive Dashboards",
-    excerpt: "Designing for the C-suite requires restraint. Why less is more when building top-level business intelligence interfaces.",
-    date: "Aug 18, 2023",
-    readTime: "6 min read",
-    category: "Visualization",
-    accent: "from-violet-500 to-purple-500",
-    accentBg: "bg-violet-50",
-    accentText: "text-violet-700",
-  },
-  {
-    title: "Quantitative Methods in Python",
-    excerpt: "Translating rigorous statistical theory into scalable scikit-learn and statsmodels pipelines for real-world data problems.",
-    date: "Jul 22, 2023",
-    readTime: "10 min read",
-    category: "Analysis",
-    accent: "from-sky-500 to-cyan-500",
-    accentBg: "bg-sky-50",
-    accentText: "text-sky-700",
-  },
-  {
-    title: "Bridging the Gap: React & Data Pipelines",
-    excerpt: "Architecting middle-tier APIs that serve complex analytics to front-end dashboards without freezing the browser.",
-    date: "Jun 10, 2023",
-    readTime: "9 min read",
+    title: "Building Real-time WebSockets Dashboard in React",
+    excerpt: "Step-by-step code tutorial on setting up real-time server connections and plotting them without UI lag.",
+    date: "Dec 08, 2025",
+    readTime: "22 min video",
     category: "Web Dev",
     accent: "from-emerald-500 to-teal-500",
     accentBg: "bg-emerald-50",
     accentText: "text-emerald-700",
   },
   {
-    title: "Causal Inference with Stata: A Practitioner's Guide",
-    excerpt: "When correlation isn't enough — applying instrumental variables, diff-in-diff, and RDD to extract causal signals from observational data.",
-    date: "May 03, 2023",
-    readTime: "14 min read",
-    category: "Analysis",
-    accent: "from-sky-500 to-cyan-500",
-    accentBg: "bg-sky-50",
-    accentText: "text-sky-700",
-  },
-  {
-    title: "dbt + Airflow: The Modern Analytics Stack",
-    excerpt: "How to orchestrate transformation jobs end-to-end with reliable lineage, testing, and documentation baked in from the start.",
-    date: "Apr 15, 2023",
-    readTime: "11 min read",
-    category: "Data Engineering",
+    title: "Kafka clusters setup locally in 10 minutes",
+    excerpt: "Stop wasting hours setting up Kafka. We configure docker-compose and run producer/consumer flows instantly.",
+    date: "Oct 24, 2025",
+    readTime: "10 min video",
+    category: "Big Data",
     accent: "from-orange-400 to-amber-500",
     accentBg: "bg-orange-50",
     accentText: "text-orange-700",
   },
   {
-    title: "Color Theory for Data Visualization",
-    excerpt: "Sequential vs. diverging vs. categorical palettes — and why the wrong choice silently misleads your audience every single time.",
-    date: "Mar 28, 2023",
-    readTime: "7 min read",
-    category: "Visualization",
-    accent: "from-violet-500 to-purple-500",
-    accentBg: "bg-violet-50",
-    accentText: "text-violet-700",
-  },
-  {
-    title: "TypeScript for Data Scientists",
-    excerpt: "Why adding static types to your data-fetching layer eliminates a whole class of production bugs before they reach your stakeholders.",
-    date: "Feb 14, 2023",
-    readTime: "8 min read",
-    category: "Web Dev",
-    accent: "from-emerald-500 to-teal-500",
-    accentBg: "bg-emerald-50",
-    accentText: "text-emerald-700",
-  },
+    title: "Pandas Vectorization vs. Loop Performance",
+    excerpt: "Visualizing why vectorized operations are 100x faster, with live benchmark scripts and explanations.",
+    date: "Sep 12, 2025",
+    readTime: "14 min video",
+    category: "Data Science",
+    accent: "from-sky-500 to-cyan-500",
+    accentBg: "bg-sky-50",
+    accentText: "text-sky-700",
+  }
 ];
 
-const categories = ["All", "Visualization", "Data Engineering", "Analysis", "Web Dev"];
+const categories = ["All", "Big Data", "Data Science", "Web Dev"];
 
 const categoryColors: Record<string, string> = {
   All: "bg-slate-900 text-white",
-  Visualization: "bg-violet-600 text-white",
-  "Data Engineering": "bg-orange-500 text-white",
-  Analysis: "bg-sky-500 text-white",
+  "Big Data": "bg-orange-500 text-white",
+  "Data Science": "bg-sky-500 text-white",
   "Web Dev": "bg-emerald-600 text-white",
 };
 
 const categoryInactive: Record<string, string> = {
   All: "bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800",
-  Visualization: "bg-white text-violet-600 hover:bg-violet-50 dark:bg-slate-900 dark:text-violet-300 dark:hover:bg-slate-800",
-  "Data Engineering": "bg-white text-orange-600 hover:bg-orange-50 dark:bg-slate-900 dark:text-orange-300 dark:hover:bg-slate-800",
-  Analysis: "bg-white text-sky-600 hover:bg-sky-50 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800",
+  "Big Data": "bg-white text-orange-600 hover:bg-orange-50 dark:bg-slate-900 dark:text-orange-300 dark:hover:bg-slate-800",
+  "Data Science": "bg-white text-sky-600 hover:bg-sky-50 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800",
   "Web Dev": "bg-white text-emerald-600 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-slate-800",
 };
 
-export default function Blog() {
+export default function VideoTutorials() {
   const [active, setActive] = useState("All");
   const [query, setQuery] = useState("");
 
@@ -151,10 +99,10 @@ export default function Blog() {
             >
               <p className="text-xs font-semibold uppercase tracking-widest text-violet-500 mb-4">Learning resources</p>
               <h1 className="blog-charcoal-heading text-4xl md:text-6xl font-bold tracking-tight text-[#1f1f1f] dark:text-[#1f1f1f] mb-5 leading-tight">
-                Writing on data,<br />science, and craft.
+                Hands-on guides,<br />walkthroughs, and code.
               </h1>
               <p className="text-lg text-slate-500 dark:text-slate-300 max-w-xl leading-relaxed font-light">
-                Thoughts on statistical rigor, pipeline architecture, and the art of communicating with data.
+                Detailed screen recordings, system architectural explanations, and implementation walkthroughs.
               </p>
             </motion.div>
           </div>
@@ -175,7 +123,7 @@ export default function Blog() {
                   key={cat}
                   onClick={() => setActive(cat)}
                   data-testid={`filter-${cat.toLowerCase().replace(/\s+/g, "-")}`}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-400 shadow-sm ${
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-400 shadow-sm cursor-pointer ${
                     active === cat ? categoryColors[cat] : categoryInactive[cat]
                   }`}
                 >
@@ -201,8 +149,8 @@ export default function Blog() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search articles..."
-                data-testid="input-blog-search"
+                placeholder="Search videos..."
+                data-testid="input-video-search"
                 className="w-full pl-10 pr-9 py-2.5 rounded-full text-sm bg-white dark:bg-slate-900 border-0 shadow-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-300 dark:focus:ring-violet-400/50 transition-all duration-300"
               />
               {query && (
@@ -220,7 +168,7 @@ export default function Blog() {
           {/* Result count */}
           <div className="container max-w-7xl mx-auto px-6 md:px-10 mt-2">
             <span className="text-xs text-slate-400 dark:text-slate-500">
-              {filtered.length} article{filtered.length !== 1 ? "s" : ""}
+              {filtered.length} video{filtered.length !== 1 ? "s" : ""}
               {query && <> matching <span className="font-medium text-slate-600 dark:text-slate-300">"{query}"</span></>}
             </span>
           </div>
@@ -242,7 +190,7 @@ export default function Blog() {
                     className="group flex flex-col rounded-2xl bg-white dark:bg-slate-900 overflow-hidden cursor-pointer"
                     style={{ boxShadow: "0 4px 24px -4px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04)" }}
                     whileHover={{ y: -4, boxShadow: "0 16px 40px -8px rgba(0,0,0,0.14), 0 4px 12px -2px rgba(0,0,0,0.06)", transition: { duration: 0.4 } }}
-                    data-testid={`card-blog-${i}`}
+                    data-testid={`card-video-${i}`}
                   >
                     <div className={`h-1.5 w-full bg-gradient-to-r ${post.accent}`} />
                     <div className="p-7 flex flex-col flex-1">
@@ -262,7 +210,7 @@ export default function Blog() {
                           {post.readTime}
                         </div>
                         <span className={`inline-flex items-center gap-1 text-sm font-semibold transition-all duration-300 group-hover:gap-2 ${post.accentText} dark:text-violet-300`}>
-                          Read <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                          Watch Video <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                         </span>
                       </div>
                     </div>
@@ -277,14 +225,14 @@ export default function Blog() {
                 animate={{ opacity: 1 }}
                 className="text-center py-24"
               >
-                <p className="text-slate-400 dark:text-slate-500 text-lg mb-2">No articles found</p>
+                <p className="text-slate-400 dark:text-slate-500 text-lg mb-2">No videos found</p>
                 <p className="text-slate-300 dark:text-slate-600 text-sm">
                   Try a different search term or category
                 </p>
                 {query && (
                   <button
                     onClick={() => setQuery("")}
-                    className="mt-4 text-sm text-violet-500 hover:text-violet-700 font-medium transition-colors"
+                    className="mt-4 text-sm text-violet-500 hover:text-violet-700 font-medium transition-colors cursor-pointer"
                     data-testid="button-clear-search-empty"
                   >
                     Clear search

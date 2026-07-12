@@ -9,10 +9,10 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Database, LineChart, PieChart, Code, Menu, X, Cpu, BarChart2, Moon, Sun, Layout, Server, Cloud, GitBranch, Layers, Search } from "lucide-react";
+import { Database, LineChart, PieChart, Code, Menu, X, Cpu, BarChart2, Moon, Sun, Layout, Server, Cloud, GitBranch, Layers, Search, Home, Send } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SiPython, SiR, SiScala } from "react-icons/si";
+import { SiPython, SiR, SiScala, SiApachecassandra } from "react-icons/si";
 import { useTheme } from "@/hooks/useTheme";
 
 const bigDataItems = [
@@ -44,7 +44,7 @@ const bigDataItems = [
     id: "cassandra",
     label: "Apache Cassandra",
     desc: "High-availability distributed NoSQL database",
-    Icon: Layers,
+    Icon: SiApachecassandra,
     accent: "text-violet-600 bg-violet-100/70",
     featured: ["CQL queries", "Data partitioning", "Replication strategies"],
   },
@@ -200,52 +200,63 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-[9999] w-full border-b border-teal-100/40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md transition-all duration-500 ease-in-out">
-      <div className="container flex h-16 items-center justify-between px-6 md:px-10 max-w-7xl mx-auto">
+      <div className="container flex h-16 items-center px-6 md:px-10 max-w-7xl mx-auto">
 
-        {/* ── Creative wordmark logo ── */}
-        <Link href="/" className="flex items-center gap-3 group" data-testid="link-home">
-          <style>{`
-            @keyframes dotClockwise {
-              0%, 20% {
-                background-color: #7c3aed; /* Active premium violet */
+        {/* Logo (left) */}
+        <div className="flex-1 flex items-center justify-start">
+          <Link href="/" className="flex items-center gap-3 group" data-testid="link-home">
+            <style>{`
+              @keyframes dotClockwise {
+                0%, 20% {
+                  background-color: #7c3aed; /* Active premium violet */
+                }
+                30%, 100% {
+                  background-color: var(--dot-inactive, #cbd5e1);
+                }
               }
-              30%, 100% {
-                background-color: var(--dot-inactive, #cbd5e1);
+              .logo-dot {
+                --dot-inactive: #cbd5e1;
+                animation: dotClockwise 2s infinite;
               }
-            }
-            .logo-dot {
-              --dot-inactive: #cbd5e1;
-              animation: dotClockwise 2s infinite;
-            }
-            .dark .logo-dot {
-              --dot-inactive: #475569;
-            }
-            .logo-dot-1 { animation-delay: 0s; }
-            .logo-dot-2 { animation-delay: 0.5s; }
-            .logo-dot-3 { animation-delay: 1s; }
-            .logo-dot-4 { animation-delay: 1.5s; }
-          `}</style>
-          {/* 2×2 dot-grid mark */}
-          <div className="grid grid-cols-2 gap-[3px] transition-transform duration-500 group-hover:rotate-90">
-            {/* Top-Left */}
-            <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-1" />
-            {/* Top-Right */}
-            <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-2" />
-            {/* Bottom-Left */}
-            <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-4" />
-            {/* Bottom-Right */}
-            <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-3" />
-          </div>
-          {/* Split wordmark */}
-          <div className="flex items-baseline leading-none select-none">
-            <span className="text-[17px] font-extralight tracking-tight text-slate-500 dark:text-slate-450">Big</span><span className="text-[17px] font-black tracking-tight text-teal-650 text-teal-600 dark:text-teal-400">Data</span><span className="text-[17px] font-medium tracking-tight" style={{ color: "#7c3aed" }}>Society</span>
-          </div>
-        </Link>
+              .dark .logo-dot {
+                --dot-inactive: #475569;
+              }
+              .logo-dot-1 { animation-delay: 0s; }
+              .logo-dot-2 { animation-delay: 0.5s; }
+              .logo-dot-3 { animation-delay: 1s; }
+              .logo-dot-4 { animation-delay: 1.5s; }
+            `}</style>
+            {/* 2×2 dot-grid mark */}
+            <div className="grid grid-cols-2 gap-[3px] transition-transform duration-500 group-hover:rotate-90">
+              {/* Top-Left */}
+              <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-1" />
+              {/* Top-Right */}
+              <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-2" />
+              {/* Bottom-Left */}
+              <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-4" />
+              {/* Bottom-Right */}
+              <span className="h-[6px] w-[6px] rounded-full logo-dot logo-dot-3" />
+            </div>
+            {/* Split wordmark */}
+            <div className="flex items-baseline leading-none select-none">
+              <span className="text-[17px] font-extralight tracking-tight text-slate-500 dark:text-slate-450">Big</span><span className="text-[17px] font-black tracking-tight text-teal-650 text-teal-600 dark:text-teal-400">Data</span><span className="text-[17px] font-medium tracking-tight" style={{ color: "#7c3aed" }}>Society</span>
+            </div>
+          </Link>
+        </div>
 
-        {/* ── Desktop nav ── */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* Desktop nav menu (middle) */}
+        <div className="hidden md:flex items-center justify-center">
           <NavigationMenu>
             <NavigationMenuList>
+
+              <NavigationMenuItem className="group/navlink relative">
+                <Link href="/" data-testid="link-nav-home" aria-label="Home">
+                  <span className="text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors duration-300 relative block px-4 py-2 flex items-center justify-center">
+                    <Home className="w-[18px] h-[18px]" />
+                    <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transform-gpu origin-left transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] scale-x-0 group-hover/navlink:scale-x-100" />
+                  </span>
+                </Link>
+              </NavigationMenuItem>
 
               <NavigationMenuItem className="group/navlink relative">
                 <Link href="/data-projects" data-testid="link-nav-projects">
@@ -297,7 +308,6 @@ export function Navbar() {
                                   <div className={megaMenuTitleClass}>
                                     {item.label}
                                   </div>
-                                  <p className={megaMenuDescClass}>{item.desc}</p>
                                 </div>
                               </div>
                               <ul className="space-y-1.5">
@@ -355,7 +365,6 @@ export function Navbar() {
                                   <div className={megaMenuTitleClass}>
                                     {lang.label}
                                   </div>
-                                  <p className={megaMenuDescClass}>{lang.desc}</p>
                                 </div>
                               </div>
                               <ul className="space-y-1.5">
@@ -413,7 +422,6 @@ export function Navbar() {
                                   <div className={megaMenuTitleClass}>
                                     {item.label}
                                   </div>
-                                  <p className={megaMenuDescClass}>{item.desc}</p>
                                 </div>
                               </div>
                               <ul className="space-y-1.5">
@@ -433,69 +441,68 @@ export function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="group/navlink relative">
-                <Link href="/visualization" data-testid="link-nav-visualization">
-                  <span className={navLinkStyle("/visualization")}>
-                    Chart Gallery
-                    <span className={cn(
-                      "absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transform-gpu origin-left transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      isActive("/visualization") ? "scale-x-100" : "scale-x-0 group-hover/navlink:scale-x-100"
-                    )} />
-                  </span>
-                </Link>
-              </NavigationMenuItem>
-
             </NavigationMenuList>
           </NavigationMenu>
-
-          {/* Dark mode toggle */}
-          <button
-            onClick={toggle}
-            data-testid="button-theme-toggle"
-            aria-label="Toggle dark mode"
-            className="ml-1 h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-500"
-          >
-            {isDark
-              ? <Sun className="h-4 w-4 transition-all duration-700 rotate-0" />
-              : <Moon className="h-4 w-4 transition-all duration-700" />
-            }
-          </button>
-
-          {/* CTA button — fully rounded */}
-          <Button
-            asChild
-            size="sm"
-            className="ml-1 font-semibold rounded-full px-5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-700 shadow-sm shadow-violet-200 dark:shadow-violet-900"
-          >
-            <Link href="/contact" data-testid="link-nav-contact">Let's Talk</Link>
-          </Button>
         </div>
 
-        {/* Mobile controls */}
-        <div className="md:hidden flex items-center gap-2">
-          <button
-            onClick={toggle}
-            aria-label="Toggle dark mode"
-            className="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-500"
-          >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            data-testid="button-mobile-menu"
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+        {/* Actions (right) */}
+        <div className="flex-1 flex items-center justify-end">
+          {/* Desktop controls */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggle}
+              data-testid="button-theme-toggle"
+              aria-label="Toggle dark mode"
+              className="ml-1 h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-500"
+            >
+              {isDark
+                ? <Sun className="h-4 w-4 transition-all duration-700 rotate-0" />
+                : <Moon className="h-4 w-4 transition-all duration-700" />
+              }
+            </button>
+
+            {/* Contact Circle Button */}
+            <Link 
+              href="/contact" 
+              data-testid="link-nav-contact" 
+              aria-label="Contact"
+              className="ml-1 h-9 w-9 rounded-full flex items-center justify-center text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300 shadow-sm shadow-violet-200 dark:shadow-violet-900"
+            >
+              <Send className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* Mobile controls */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={toggle}
+              aria-label="Toggle dark mode"
+              className="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-500"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-testid="button-mobile-menu"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-5 space-y-5">
-          <Link href="/data-projects" className="block text-sm font-medium p-2 text-teal-600 dark:text-teal-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/" className="flex items-center gap-2 text-sm font-medium p-2 hover:bg-slate-55 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Home className="h-4 w-4 text-slate-400" />
+            Home
+          </Link>
+          <Link href="/data-projects" className="block text-sm font-medium p-2 text-teal-600 dark:text-teal-400 font-semibold hover:bg-slate-55 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             Data Projects
           </Link>
           <div className="space-y-1">
@@ -525,10 +532,11 @@ export function Navbar() {
               </Link>
             ))}
           </div>
-          <Link href="/visualization" className="block text-sm font-medium p-2 hover:bg-slate-55 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-            Chart Gallery
+
+          <Link href="/contact" className="flex items-center gap-2 text-sm font-medium p-2 hover:bg-slate-55 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Send className="h-4 w-4 text-slate-400" />
+            Contact
           </Link>
-          <Link href="/contact" className="block text-sm font-medium p-2 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-full text-center font-semibold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Let's Talk</Link>
         </div>
       )}
     </header>

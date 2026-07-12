@@ -36,21 +36,57 @@ export default function BigData() {
       <main className="flex-1">
         {/* ── Hero Section ── */}
         <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28 border-b border-teal-100 bg-gradient-to-br from-yellow-100/40 via-teal-50/50 to-cyan-100/40">
-          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.4))]" />
           <div className="container max-w-7xl mx-auto px-4 md:px-8 relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
-              Understanding Scale
-            </span>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 mb-6 max-w-4xl leading-tight">
-              Big Data: The Silent Footprints of Modern Society
-            </h1>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                Big data is simply the digital footprints of our collective lives. Every search we run, every song we stream, and every package we order leaves a tiny digital crumb. When we gather trillions of these crumbs together, they cease to be noise and become a map of human behavior.
-              </p>
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                It's the hidden engine optimizing how cities breathe, predicting disease outbreaks before they spread, and ensuring food gets distributed efficiently. Beyond the servers and code, big data is about understanding ourselves at a scale we never could before, using history to build a smarter, more cooperative tomorrow.
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-sky-200/50 via-cyan-200/35 to-transparent blur-3xl" />
+                <div className="relative z-10">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
+                    Understanding Scale
+                  </span>
+                  <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 max-w-4xl leading-tight">
+                    Big Data: The Silent Footprints of Modern Society
+                  </h1>
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-5">
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  Big data is simply the digital footprints of our collective lives. Every search we run, every song we stream, and every package we order leaves a tiny digital crumb. When we gather trillions of these crumbs together, they cease to be noise and become a map of human behavior.
+                </p>
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  It's the hidden engine optimizing how cities breathe, predicting disease outbreaks before they spread, and ensuring food gets distributed efficiently. Beyond the servers and code, big data is about understanding ourselves at a scale we never could before, using history to build a smarter, more cooperative tomorrow.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Second Hero Section: Responsibility ── */}
+        <section className="relative overflow-hidden py-24 border-b border-teal-100 bg-gradient-to-r from-emerald-100/30 via-teal-50/40 to-yellow-100/30">
+          <div className="container max-w-7xl mx-auto px-4 md:px-8 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-teal-200/45 via-emerald-200/30 to-transparent blur-3xl" />
+                <div className="relative z-10">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50/50 border border-teal-100 mb-6">
+                    Ethics & Safety
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+                    "With big data comes big responsibilities"
+                  </h2>
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-6 text-slate-600 font-light leading-relaxed text-lg">
+                <p>
+                  Computers are incredibly good at finding patterns in huge piles of numbers, but they don't understand the real world. A machine can tell us the average of a dataset or predict a trend, but it cannot know if a prediction is fair, kind, or helpful to real people. 
+                </p>
+                <p>
+                  To make sure big data actually makes our lives better, we need human eyes and human hearts. We need researchers and practitioners who ask hard questions: Who does this data represent? Who does it leave out? And what happens to the individuals behind the statistics if we get things wrong?
+                </p>
+                <p>
+                  Data should never replace human judgment and empathy. It is simply a tool to help us see the world more clearly, but deciding what to do with that view is always our choice and our responsibility.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -60,14 +96,11 @@ export default function BigData() {
           <div className="container max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
               <div>
-                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">
-                  Perspectives
-                </span>
                 <h2 className="text-3xl font-bold text-slate-900 mt-2">
-                  Human Stories in a World of Numbers
+                  Tutorials
                 </h2>
                 <p className="text-sm text-slate-500 mt-2 max-w-xl">
-                  Essays exploring the intersection of heavy infrastructure, human behaviors, and the future of technology.
+                  Step-by-step guides and tutorials for scaling and optimizing modern databases and pipelines.
                 </p>
               </div>
 

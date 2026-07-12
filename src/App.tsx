@@ -13,6 +13,9 @@ import Contact from "@/pages/Contact";
 import DataScience from "@/pages/DataScience";
 import BlogPostDetail from "@/pages/BlogPostDetail";
 import DataProjects from "@/pages/DataProjects";
+import VideoTutorials from "@/pages/VideoTutorials";
+import ChartGallery from "@/pages/ChartGallery";
+import OpenData from "@/pages/OpenData";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -34,6 +37,9 @@ function App() {
             <Route path="/contact" component={Contact} />
             <Route path="/data-science" component={DataScience} />
             <Route path="/data-science/:lang" component={DataScience} />
+            <Route path="/video-tutorials" component={VideoTutorials} />
+            <Route path="/chart-gallery" component={ChartGallery} />
+            <Route path="/open-data" component={OpenData} />
             <Route component={NotFound} />
           </Switch>
         </WouterRouter>

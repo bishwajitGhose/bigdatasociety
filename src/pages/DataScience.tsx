@@ -36,21 +36,27 @@ export default function DataScience() {
       <main className="flex-1">
         {/* ── Hero Section ── */}
         <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28 border-b border-teal-100 bg-gradient-to-br from-yellow-100/40 via-teal-50/50 to-cyan-100/40">
-          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.4))]" />
           <div className="container max-w-7xl mx-auto px-4 md:px-8 relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
-              Translating Numbers
-            </span>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 mb-6 max-w-4xl leading-tight">
-              Data Science: Finding Truth in the Whispers of Noise
-            </h1>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                Data Science is the art of translating cold database entries into clear human stories. It is the language of probability, modeling, and discovery. Every day, trillions of data points are created—representing our climates, our economies, and our habits. Data science helps us look at this ocean of information and find the current.
-              </p>
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                From helping doctors predict which therapy will cure a patient, to forecasting crop yields during severe droughts, data science shapes how we plan for the future. It’s not just about standard deviations or regression lines; it’s about finding truth in noise and using it to guide our choices.
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-cyan-200/50 via-sky-200/35 to-transparent blur-3xl" />
+                <div className="relative z-10">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
+                    Translating Numbers
+                  </span>
+                  <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 max-w-4xl leading-tight">
+                    Data Science: Finding Truth in the Whispers of Noise
+                  </h1>
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-5">
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  Data Science is the art of translating cold database entries into clear human stories. It is the language of probability, modeling, and discovery. Every day, trillions of data points are created-representing our climates, our economies, and our habits. Data science helps us look at this ocean of information and find the current.
+                </p>
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  From helping doctors predict which therapy will cure a patient, to forecasting crop yields during severe droughts, data science shapes how we plan for the future. It's not just about standard deviations or regression lines; it's about finding truth in noise and using it to guide our choices.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -60,14 +66,11 @@ export default function DataScience() {
           <div className="container max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
               <div>
-                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">
-                  Perspectives
-                </span>
                 <h2 className="text-3xl font-bold text-slate-900 mt-2">
-                  Insights &amp; Methodologies
+                  Tutorials
                 </h2>
                 <p className="text-sm text-slate-500 mt-2 max-w-xl">
-                  Essays exploring scientific computation, statistical analysis, and machine learning models.
+                  Step-by-step guides and tutorials for scientific computation, statistical analysis, and machine learning models.
                 </p>
               </div>
 

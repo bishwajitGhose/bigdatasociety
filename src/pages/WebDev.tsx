@@ -36,21 +36,27 @@ export default function WebDev() {
       <main className="flex-1">
         {/* ── Hero Section ── */}
         <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28 border-b border-teal-100 bg-gradient-to-br from-yellow-100/40 via-teal-50/50 to-cyan-100/40">
-          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.4))]" />
           <div className="container max-w-7xl mx-auto px-4 md:px-8 relative">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
-              Building interfaces
-            </span>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 mb-6 max-w-4xl leading-tight">
-              Web Dev: Bridging Imagination and the Digital World
-            </h1>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                Web Development is the bridge between human imagination and the digital world. It is the craft of building the virtual spaces where we meet, learn, work, and play. Every website, app, and interface is a digital home designed to serve a human need.
-              </p>
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
-                From simple blogs to massive global networks, web development is about making technology accessible, intuitive, and responsive. It transforms cold lines of database entries and API responses into vibrant, interactive interfaces that anyone can use. By creating these connections, web development shapes how we collaborate, share knowledge, and build communities across the globe.
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/50 via-cyan-200/35 to-transparent blur-3xl" />
+                <div className="relative z-10">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 mb-6">
+                    Building interfaces
+                  </span>
+                  <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 max-w-4xl leading-tight">
+                    Web Dev: Bridging Imagination and the Digital World
+                  </h1>
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-5">
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  Web Development is the bridge between human imagination and the digital world. It is the craft of building the virtual spaces where we meet, learn, work, and play. Every website, app, and interface is a digital home designed to serve a human need.
+                </p>
+                <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-light">
+                  From simple blogs to massive global networks, web development is about making technology accessible, intuitive, and responsive. It transforms cold lines of database entries and API responses into vibrant, interactive interfaces that anyone can use. By creating these connections, web development shapes how we collaborate, share knowledge, and build communities across the globe.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -60,14 +66,11 @@ export default function WebDev() {
           <div className="container max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
               <div>
-                <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">
-                  Perspectives
-                </span>
                 <h2 className="text-3xl font-bold text-slate-900 mt-2">
-                  Code &amp; Interfaces
+                  Tutorials
                 </h2>
                 <p className="text-sm text-slate-500 mt-2 max-w-xl">
-                  Essays exploring web architectures, API design, full-stack systems, and deployment workflows.
+                  Step-by-step guides and tutorials for web architectures, API design, full-stack systems, and deployment workflows.
                 </p>
               </div>
 
