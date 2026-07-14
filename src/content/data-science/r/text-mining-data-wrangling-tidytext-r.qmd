@@ -1,0 +1,1116 @@
+---
+title: "Text Mining and Data Wrangling with tidytext in R: A Complete Guide"
+author: "Bishwajit Ghose"
+date: "2026-07-12"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    code-copy: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: auto
+keywords:
+  - tidytext
+  - text mining in R
+  - text data wrangling
+  - tokenisation
+  - sentiment analysis
+  - tf-idf
+  - R programming
+description: "A plain-language guide to text mining and data wrangling with tidytext in R, with 33 reproducible practical use cases."
+---
+
+# Introduction
+
+Text is everywhere. Survey comments, interview notes, customer feedback, reports, and social media posts all contain useful information. However, text is not ready for analysis in its original form. A sentence may contain many words, punctuation marks, numbers, and repeated terms. Before we count or compare text, we normally need to turn it into a clear table.
+
+The **tidytext** package helps us apply tidy-data ideas to text. The package provides tools for changing text to and from tidy formats, and it works with packages such as `dplyr`, `tidyr`, and `ggplot2`. Its central pattern is one token per row. A token can be a word, sentence, line, paragraph, character, or n-gram. The official package introduction shows `unnest_tokens()` changing a text column into one-word-per-row data, after which normal tidy tools can be used ([tidytext overview](https://juliasilge.github.io/tidytext/); [introduction to tidytext](https://juliasilge.github.io/tidytext/articles/tidytext.html)).
+
+This article uses very plain language. It includes **33 practical use cases**. All main examples use a small data set created inside this document. This means the article does not download text from the internet. It should render on a normal R installation after the named packages are installed.
+
+Text analysis can support exploration, but it does not understand meaning like a human reader. Context, sarcasm, negation, spelling, language, and cultural meaning can affect the result. We should combine counts with careful reading and subject knowledge.
+
+# Install and load packages
+
+Install packages one time. Load them in every new R session.
+
+```{r}
+#| label: setup
+#| message: false
+
+# Run only if needed:
+# install.packages(c("tidytext", "dplyr", "tidyr", "ggplot2"))
+
+library(tidytext)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+This guide avoids newer experimental functions. It mainly uses stable tidytext and tidyverse functions. The official tidytext index lists tokenisers, TF-IDF tools, sentiment and stop-word data, casting functions, tidiers, and graphing helpers ([tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)).
+
+# Create a small text data set
+
+Each row below is one feedback document. The data is synthetic and is used only for teaching.
+
+```{r}
+feedback <- tibble(
+  document_id = 1:10,
+  site = c("Ottawa", "Ottawa", "Toronto", "Toronto", "Montreal",
+           "Montreal", "Ottawa", "Toronto", "Montreal", "Ottawa"),
+  topic = c("service", "portal", "service", "waiting", "staff",
+            "portal", "waiting", "staff", "service", "portal"),
+  text = c(
+    "The staff were friendly and helpful. The visit was quick.",
+    "The online portal is useful, but the login process is confusing.",
+    "Good service and clear information from the nurse.",
+    "The waiting time was long and the room was crowded.",
+    "Excellent staff. I felt respected and safe.",
+    "The portal was slow. I could not find my appointment.",
+    "Service was good, although I waited for a long time.",
+    "The receptionist was kind and the instructions were clear.",
+    "The visit was disappointing because the information was unclear.",
+    "The new portal is fast, simple, and easy to use."
+  )
+)
+
+feedback
+```
+
+The unit of observation is one feedback document. After tokenisation, the unit changes. For word tokens, one row will represent one word in one document.
+
+# Inspect and prepare text
+
+## Use case 1: Inspect the text table
+
+Always inspect the structure before tokenising.
+
+```{r}
+glimpse(feedback)
+```
+
+Check that the text column is character data and that identifiers are present. A stable document ID is very important because tokenisation creates many rows from one source row.
+
+## Use case 2: Create a line number or sequence
+
+Some imported text has several rows for one document. A sequence helps preserve order.
+
+```{r}
+feedback_ordered <- feedback |>
+  mutate(line = row_number())
+
+feedback_ordered |>
+  select(document_id, line, text)
+```
+
+Do not depend on accidental row order. Keep a real line, paragraph, date, or sequence variable when order matters.
+
+## Use case 3: Remove empty text before tokenising
+
+Blank strings and missing text do not provide tokens.
+
+```{r}
+text_with_blanks <- bind_rows(
+  feedback,
+  tibble(document_id = 11:12, site = "Ottawa", topic = "other",
+         text = c("", NA_character_))
+)
+
+text_ready <- text_with_blanks |>
+  filter(!is.na(text), trimws(text) != "")
+
+text_ready
+```
+
+Keep a record of removed rows when missing text is meaningful. For example, a blank survey response is different from a negative response.
+
+# Tokenise text
+
+## Use case 4: Tokenise into words with `unnest_tokens()`
+
+The default token is a word.
+
+```{r}
+words <- feedback |>
+  unnest_tokens(word, text)
+
+words
+```
+
+`unnest_tokens()` takes an output column name and an input text column. It creates one token per row. By default, word tokens are converted to lower case. The official documentation explains that token options also include characters, n-grams, sentences, lines, paragraphs, and regular-expression separation ([tidytext overview](https://juliasilge.github.io/tidytext/)).
+
+## Use case 5: Preserve original letter case
+
+Sometimes capital letters have meaning. Use `to_lower = FALSE`.
+
+```{r}
+feedback |>
+  unnest_tokens(word, text, to_lower = FALSE) |>
+  select(document_id, word)
+```
+
+Lower case is useful for counting `Service` and `service` together. Preserve case when proper names, acronyms, or sentence starts matter.
+
+## Use case 6: Tokenise into sentences
+
+Sentence tokens keep more context than words.
+
+```{r}
+sentences <- feedback |>
+  unnest_tokens(sentence, text, token = "sentences")
+
+sentences |>
+  select(document_id, sentence)
+```
+
+Sentence tokenisation is useful when sentiment or themes should be studied at sentence level rather than document level.
+
+## Use case 7: Tokenise into lines
+
+Line tokenisation is useful for poems, transcripts, or files where line breaks are meaningful.
+
+```{r}
+line_text <- tibble(
+  document_id = 1:2,
+  text = c("first line\nsecond line", "another line\nfinal line")
+)
+
+line_text |>
+  unnest_tokens(line, text, token = "lines")
+```
+
+A line is a formatting unit, not always a complete sentence. Choose the token that matches the question.
+
+## Use case 8: Tokenise into paragraphs
+
+Paragraphs preserve larger blocks of meaning.
+
+```{r}
+paragraph_text <- tibble(
+  id = 1,
+  text = "The service was helpful.\n\nThe portal was difficult to use."
+)
+
+paragraph_text |>
+  unnest_tokens(paragraph, text, token = "paragraphs")
+```
+
+Paragraph tokens can be useful for long reports or interview notes.
+
+## Use case 9: Tokenise into characters
+
+Character tokens can help examine spelling, scripts, or letter frequencies.
+
+```{r}
+short_text <- tibble(id = 1, text = "Data")
+
+short_text |>
+  unnest_tokens(character, text, token = "characters")
+```
+
+Character analysis answers a different question from word analysis. Spaces and punctuation may be treated by the underlying tokeniser, so inspect the result.
+
+## Use case 10: Create word bigrams
+
+A bigram is a sequence of two neighbouring words.
+
+```{r}
+bigrams <- feedback |>
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+bigrams
+```
+
+Bigrams keep a little more context. They can reveal phrases such as “waiting time” or “online portal”.
+
+## Use case 11: Create trigrams
+
+A trigram contains three neighbouring words.
+
+```{r}
+feedback |>
+  unnest_tokens(trigram, text, token = "ngrams", n = 3) |>
+  count(trigram, sort = TRUE)
+```
+
+Longer n-grams become sparse quickly. In a small data set, most trigrams appear only one time.
+
+## Use case 12: Use skip n-grams
+
+Skip n-grams allow gaps between words.
+
+```{r}
+feedback |>
+  unnest_tokens(
+    skip_bigram,
+    text,
+    token = "skip_ngrams",
+    n = 2,
+    k = 1
+  ) |>
+  select(document_id, skip_bigram)
+```
+
+This may capture relationships that are close but not directly adjacent. It also produces more combinations, so use it with a clear reason.
+
+## Use case 13: Tokenise with a regular expression
+
+A regular-expression tokeniser can split around a chosen pattern.
+
+```{r}
+tag_text <- tibble(id = 1:2, text = c("service|waiting|staff", "portal|login"))
+
+tag_text |>
+  unnest_tokens(tag, text, token = "regex", pattern = "\\|")
+```
+
+This is useful for tags or coded text separated by a known character.
+
+# Count and filter words
+
+## Use case 14: Count word frequency
+
+After tokenisation, normal `dplyr` functions work naturally.
+
+```{r}
+word_counts <- words |>
+  count(word, sort = TRUE)
+
+word_counts
+```
+
+Common grammar words usually appear at the top. Frequency is a starting point, not a complete interpretation.
+
+## Use case 15: Count words by group
+
+We can compare word counts across sites.
+
+```{r}
+words |>
+  count(site, word, sort = TRUE)
+```
+
+Group counts should be interpreted with group size in mind. A site with more documents will usually have more words.
+
+## Use case 16: Remove stop words with `anti_join()`
+
+Stop words are common words such as “the” and “and”. Removing them can make topical words easier to see.
+
+```{r}
+words_no_stop <- words |>
+  anti_join(stop_words, by = "word")
+
+words_no_stop |>
+  count(word, sort = TRUE)
+```
+
+The package provides tidy stop-word data, and its introduction demonstrates removing stop words with an anti-join ([tidytext introduction](https://juliasilge.github.io/tidytext/articles/tidytext.html)). Stop-word removal is optional. Common words may matter in authorship, style, or negation.
+
+## Use case 17: Use `get_stopwords()`
+
+`get_stopwords()` returns a stop-word lexicon in tidy form.
+
+```{r}
+english_stop <- get_stopwords(language = "en")
+
+english_stop
+```
+
+Available sources can depend on installed supporting packages. The built-in `stop_words` object is convenient for a fully local example.
+
+## Use case 18: Add a custom stop-word list
+
+Domain words may be common but not informative for one project.
+
+```{r}
+custom_stop <- tibble(word = c("visit", "portal", "service"))
+
+words |>
+  anti_join(stop_words, by = "word") |>
+  anti_join(custom_stop, by = "word") |>
+  count(word, sort = TRUE)
+```
+
+Document every custom removal. A word that looks unimportant may be central to the research question.
+
+## Use case 19: Keep only selected terms
+
+A small dictionary can find mentions of planned concepts.
+
+```{r}
+access_terms <- tibble(word = c("waiting", "appointment", "login", "portal"))
+
+words |>
+  semi_join(access_terms, by = "word") |>
+  count(site, word)
+```
+
+This is dictionary matching, not automatic understanding. It misses spelling variants and related phrases unless they are added.
+
+## Use case 20: Calculate document length
+
+Token counts can estimate document length.
+
+```{r}
+document_lengths <- words |>
+  count(document_id, site, name = "word_count")
+
+document_lengths
+```
+
+Word count can help find unusually short or long responses. It does not measure quality or importance.
+
+## Use case 21: Count distinct vocabulary
+
+Count unique words in each document.
+
+```{r}
+words |>
+  summarise(
+    total_words = n(),
+    unique_words = n_distinct(word),
+    .by = document_id
+  )
+```
+
+Unique vocabulary is strongly influenced by document length. Compare it carefully.
+
+# Analyse n-grams
+
+## Use case 22: Separate bigrams into two words
+
+`tidyr::separate_wider_delim()` can split a bigram.
+
+```{r}
+bigram_parts <- bigrams |>
+  separate_wider_delim(
+    bigram,
+    delim = " ",
+    names = c("word1", "word2")
+  )
+
+bigram_parts
+```
+
+After splitting, each part can be checked against stop words or dictionaries.
+
+## Use case 23: Remove bigrams containing stop words
+
+Keep only bigrams where neither word is a stop word.
+
+```{r}
+meaningful_bigrams <- bigram_parts |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word
+  ) |>
+  count(word1, word2, sort = TRUE)
+
+meaningful_bigrams
+```
+
+This is one possible rule. In phrase analysis, words such as “not” may be important and should not be removed automatically.
+
+## Use case 24: Rebuild cleaned bigrams with `unite()`
+
+After filtering the parts, join them again for display.
+
+```{r}
+bigram_parts |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word
+  ) |>
+  unite(bigram, word1, word2, sep = " ") |>
+  count(bigram, sort = TRUE)
+```
+
+Keeping both split and combined versions may be useful for different tasks.
+
+## Use case 25: Build a bigram edge table
+
+An edge table has one row for each word pair and a weight.
+
+```{r}
+bigram_edges <- bigram_parts |>
+  filter(
+    !word1 %in% stop_words$word,
+    !word2 %in% stop_words$word
+  ) |>
+  count(word1, word2, sort = TRUE)
+
+bigram_edges
+```
+
+This table can later support a network graph with another package. A connection only means that two words appeared next to each other under this tokenisation rule.
+
+# TF-IDF
+
+## Use case 26: Calculate term frequency
+
+Term frequency describes how often a word appears in a document or group.
+
+```{r}
+topic_terms <- words_no_stop |>
+  count(topic, word, sort = TRUE) |>
+  group_by(topic) |>
+  mutate(term_frequency = n / sum(n)) |>
+  ungroup()
+
+topic_terms
+```
+
+Raw counts and proportions answer different questions. Proportions make groups of different sizes easier to compare.
+
+## Use case 27: Calculate TF-IDF with `bind_tf_idf()`
+
+TF-IDF gives higher weight to words that are frequent in one document or group but less common across all documents or groups.
+
+```{r}
+topic_tf_idf <- words_no_stop |>
+  count(topic, word) |>
+  bind_tf_idf(term = word, document = topic, n = n) |>
+  arrange(desc(tf_idf))
+
+topic_tf_idf
+```
+
+The tidytext index describes `bind_tf_idf()` as adding term frequency and inverse document frequency to a tidy text data set ([tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)). TF-IDF identifies distinctive terms, not necessarily important or positive terms.
+
+## Use case 28: Find top TF-IDF terms by topic
+
+```{r}
+top_topic_terms <- topic_tf_idf |>
+  group_by(topic) |>
+  slice_max(tf_idf, n = 5, with_ties = FALSE) |>
+  ungroup()
+
+top_topic_terms
+```
+
+Small groups can produce unstable rankings. Always inspect document counts and raw frequencies beside TF-IDF.
+
+# Sentiment analysis
+
+Lexicon sentiment analysis joins words to a list of words labelled with sentiment. It is transparent and easy to reproduce, but context is limited.
+
+## Use case 29: Inspect a sentiment lexicon
+
+The Bing lexicon assigns words to positive or negative categories.
+
+```{r}
+bing_lexicon <- get_sentiments("bing")
+
+bing_lexicon
+```
+
+The package index lists `get_sentiments()` as a function that returns one sentiment lexicon in tidy form ([tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)). Some lexicons may require the `textdata` package and a separate download or licence confirmation. This guide uses Bing for a simpler local workflow.
+
+## Use case 30: Join words to sentiment labels
+
+```{r}
+sentiment_words <- words |>
+  inner_join(bing_lexicon, by = "word")
+
+sentiment_words |>
+  select(document_id, word, sentiment)
+```
+
+An inner join keeps only words present in the lexicon. Unmatched words are not automatically neutral; they are simply not labelled by this lexicon.
+
+## Use case 31: Calculate a document sentiment score
+
+Count positive and negative matches, then subtract negative from positive.
+
+```{r}
+document_sentiment <- sentiment_words |>
+  count(document_id, sentiment) |>
+  pivot_wider(
+    names_from = sentiment,
+    values_from = n,
+    values_fill = 0
+  ) |>
+  mutate(sentiment_score = positive - negative)
+
+document_sentiment
+```
+
+This score is a simple dictionary score. It does not solve sarcasm, negation, intensity, or words used with a different meaning. Do not use it as a judgement about a person.
+
+## Use case 32: Summarise sentiment by group
+
+```{r}
+site_sentiment <- sentiment_words |>
+  count(site, sentiment) |>
+  pivot_wider(
+    names_from = sentiment,
+    values_from = n,
+    values_fill = 0
+  ) |>
+  mutate(net_sentiment = positive - negative)
+
+site_sentiment
+```
+
+A larger site may have more matched words simply because it has more text. Report denominators or normalised rates when comparing groups.
+
+# Convert tidy text to matrix form
+
+## Use case 33: Create a document-term matrix with `cast_dtm()`
+
+Some text-mining packages expect a document-term matrix rather than a tidy table.
+
+```{r}
+document_word_counts <- words_no_stop |>
+  count(document_id, word)
+
+dtm <- document_word_counts |>
+  cast_dtm(document = document_id, term = word, value = n)
+
+dtm
+```
+
+The tidytext function index lists `cast_dtm()`, `cast_tdm()`, `cast_dfm()`, and `cast_sparse()` for moving from tidy counts to matrix forms ([tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)). The official casting article also shows movement between tidy text and document-term matrix objects ([tidying and casting](https://juliasilge.github.io/tidytext/articles/tidying_casting.html)).
+
+# Additional useful patterns
+
+## Convert a matrix back to tidy form
+
+If the `tm` package is installed, `tidy()` can turn a document-term matrix back into term counts.
+
+```{r}
+# The object created by cast_dtm() can be tidied again.
+tidy_dtm <- tidy(dtm)
+
+tidy_dtm
+```
+
+This round trip is useful when one modelling function needs a matrix but later analysis needs a normal tibble.
+
+## Make a word-frequency chart
+
+```{r}
+words_no_stop |>
+  count(word, sort = TRUE) |>
+  slice_max(n, n = 12, with_ties = FALSE) |>
+  mutate(word = reorder(word, n)) |>
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(
+    title = "Most frequent non-stop words",
+    x = "Count",
+    y = NULL
+  )
+```
+
+A chart is easier to read after common stop words are removed, but explain the removal rule.
+
+## Use `reorder_within()` for faceted charts
+
+A normal `reorder()` works across the full data. `reorder_within()` orders terms separately inside each facet.
+
+```{r}
+top_topic_terms |>
+  mutate(word = reorder_within(word, tf_idf, topic)) |>
+  ggplot(aes(tf_idf, word)) +
+  geom_col() +
+  facet_wrap(vars(topic), scales = "free_y") +
+  scale_y_reordered() +
+  labs(
+    title = "Distinctive words by topic",
+    x = "TF-IDF",
+    y = NULL
+  )
+```
+
+The tidytext index lists `reorder_within()` and the reordered scale helpers for ordering an axis within facets ([tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)).
+
+# A realistic tidytext workflow
+
+A clear workflow moves from raw text to checked results in small steps.
+
+## Step 1: Keep identifiers and clean empty input
+
+```{r}
+analysis_text <- feedback |>
+  filter(!is.na(text), trimws(text) != "") |>
+  mutate(source_row = row_number())
+```
+
+Keep the original document ID and a source sequence. Do not overwrite raw text.
+
+## Step 2: Tokenise into words
+
+```{r}
+analysis_words <- analysis_text |>
+  unnest_tokens(word, text)
+```
+
+The original text column is consumed by default. Keep a separate raw table when full sentences must be read later.
+
+## Step 3: Remove stop words and non-useful tokens
+
+```{r}
+analysis_words_clean <- analysis_words |>
+  anti_join(stop_words, by = "word") |>
+  filter(grepl("[a-z]", word))
+```
+
+The regular expression keeps tokens containing at least one lower-case letter. This removes tokens made only of numbers or symbols. Whether numbers are useful depends on the project.
+
+## Step 4: Count words and compute TF-IDF
+
+```{r}
+analysis_terms <- analysis_words_clean |>
+  count(topic, word) |>
+  bind_tf_idf(word, topic, n) |>
+  arrange(topic, desc(tf_idf))
+
+analysis_terms
+```
+
+## Step 5: Join sentiment labels
+
+```{r}
+analysis_sentiment <- analysis_words |>
+  inner_join(get_sentiments("bing"), by = "word") |>
+  count(document_id, sentiment) |>
+  pivot_wider(
+    names_from = sentiment,
+    values_from = n,
+    values_fill = 0
+  ) |>
+  mutate(score = positive - negative)
+
+analysis_sentiment
+```
+
+## Step 6: Return to the original text for interpretation
+
+```{r}
+feedback |>
+  left_join(analysis_sentiment, by = "document_id") |>
+  select(document_id, text, positive, negative, score)
+```
+
+Never interpret a score without reading examples. A dictionary result should guide review, not replace it.
+
+# Important checks
+
+## Check token counts
+
+```{r}
+words |>
+  summarise(
+    documents = n_distinct(document_id),
+    tokens = n(),
+    vocabulary = n_distinct(word)
+  )
+```
+
+Record these values when changing cleaning rules. A large change may show that a filter removed more than expected.
+
+## Check lost documents
+
+A document with no remaining tokens can disappear after filtering.
+
+```{r}
+feedback |>
+  anti_join(
+    words_no_stop |> distinct(document_id),
+    by = "document_id"
+  )
+```
+
+An empty result means every document kept at least one non-stop word in this example.
+
+## Check sentiment coverage
+
+```{r}
+words |>
+  summarise(
+    all_tokens = n(),
+    matched_tokens = sum(word %in% bing_lexicon$word),
+    match_rate = matched_tokens / all_tokens
+  )
+```
+
+Coverage is not accuracy. It only reports how many tokens matched the lexicon.
+
+## Check the most common unmatched words
+
+```{r}
+words |>
+  anti_join(bing_lexicon, by = "word") |>
+  anti_join(stop_words, by = "word") |>
+  count(word, sort = TRUE)
+```
+
+This can reveal domain vocabulary, spelling variants, names, or terms missing from the sentiment list.
+
+# Common mistakes
+
+## Mistake 1: Removing the document identifier
+
+Tokenisation creates many rows. Without an ID, tokens cannot be returned to their source document. Keep IDs before calling `unnest_tokens()`.
+
+## Mistake 2: Treating frequency as importance
+
+A word may be common because it is part of the topic or form design. Use context, proportions, TF-IDF, and reading together.
+
+## Mistake 3: Removing all stop words automatically
+
+Negators such as “not” may change meaning. For n-gram or sentiment work, inspect the stop-word list and preserve important words.
+
+## Mistake 4: Calling unmatched sentiment words neutral
+
+A lexicon join drops unmatched words. They are unlabelled, not proven neutral.
+
+## Mistake 5: Ignoring document size
+
+Long documents create more tokens and more sentiment matches. Compare rates or standardised values when groups have different text amounts.
+
+## Mistake 6: Reading sentiment as truth
+
+Lexicon scores do not fully handle context, sarcasm, negation, or local vocabulary. Use them as descriptive signals and read original text.
+
+## Mistake 7: Downloading data during render
+
+A blog should render reproducibly. Store permitted source data locally or create teaching data in the document. External downloads can fail or change.
+
+## Mistake 8: Publishing sensitive text
+
+Free-text responses may include names or personal details. Follow relevant privacy, ethics, consent, and data-handling requirements before analysis or publication.
+
+# Function selection guide
+
+- Use `unnest_tokens()` to move text into one-token-per-row form.
+- Use `token = "sentences"` when sentence context is needed.
+- Use `token = "ngrams"` for neighbouring word sequences.
+- Use `count()` for token frequency.
+- Use `anti_join(stop_words)` to remove standard stop words.
+- Use `get_stopwords()` to request a stop-word lexicon.
+- Use `semi_join()` for a planned dictionary.
+- Use `bind_tf_idf()` for distinctive terms across documents or groups.
+- Use `get_sentiments()` to obtain a sentiment lexicon.
+- Use `inner_join()` to attach sentiment labels.
+- Use `cast_dtm()` when another package needs a document-term matrix.
+- Use `tidy()` to return supported matrix or model objects to tidy form.
+- Use `reorder_within()` for ordered terms inside chart facets.
+
+# Final checklist
+
+Before reporting results, ask:
+
+1. What does one source row represent?
+2. What does one token row represent?
+3. Is the document ID preserved?
+4. Is the chosen token suitable for the question?
+5. Was letter case handled intentionally?
+6. Were stop words removed for a stated reason?
+7. Were important negations preserved?
+8. Are document sizes different across groups?
+9. Are raw counts shown beside normalised measures?
+10. Were duplicate or empty documents checked?
+11. What proportion of tokens matched the lexicon?
+12. Were original passages read before interpretation?
+13. Are privacy and consent requirements satisfied?
+14. Can the complete QMD render without an internet download?
+
+
+# Understanding important text-analysis choices
+
+## Choose the document level carefully
+
+A “document” does not always mean a complete file. It means the unit that we want to compare. In one project, a document may be one survey response. In another project, it may be one sentence, interview, report, chapter, or month of messages. TF-IDF, sentiment totals, and document-term matrices all depend on this choice.
+
+If several comments from one person are combined into one document, the result describes that person-level collection. If every sentence is treated as a document, the result describes sentence-level variation. Neither choice is automatically correct. Write the document definition in the method section of the analysis.
+
+The following code creates sentence documents by adding a sentence number inside each original response:
+
+```{r}
+sentence_documents <- feedback |>
+  unnest_tokens(sentence, text, token = "sentences") |>
+  group_by(document_id) |>
+  mutate(sentence_id = row_number()) |>
+  ungroup()
+
+sentence_documents
+```
+
+The pair `document_id` and `sentence_id` identifies a sentence. We can unite them into a display key, but it is usually helpful to keep both original columns.
+
+## Understand what tokenisation changes
+
+Default word tokenisation usually changes words to lower case and removes surrounding punctuation. This is useful for frequency analysis because `Good` and `good` become the same token. However, punctuation and capitalisation may carry information. An exclamation mark may show emphasis, and capital letters may identify an acronym or proper name.
+
+A strong workflow keeps the raw text unchanged and creates a separate token table. Never assume that the token table can perfectly rebuild the original document. Spaces, punctuation, and case may have changed.
+
+```{r}
+raw_feedback <- feedback
+
+token_feedback <- raw_feedback |>
+  unnest_tokens(word, text)
+```
+
+This two-object pattern is simple. `raw_feedback` supports reading and quotation checks. `token_feedback` supports counting and joins.
+
+## Decide whether stemming is needed
+
+Words such as `connect`, `connected`, and `connecting` have related roots. Stemming reduces words to a shorter form. Lemmatization tries to return a dictionary form. These steps are not performed automatically by tidytext word tokenisation.
+
+Stemming may join related forms, but the resulting stem may not be a normal word. It can also join forms that should remain separate. For a plain-language blog or small study, begin without stemming. Inspect frequent variants first. Add a stemming or lemmatization package only when the research question requires it, and document the method.
+
+A small manual dictionary can be clearer for a few known variants:
+
+```{r}
+word_map <- tibble(
+  word = c("wait", "waited", "waiting"),
+  standard_word = "wait"
+)
+
+words |>
+  left_join(word_map, by = "word") |>
+  mutate(analysis_word = coalesce(standard_word, word)) |>
+  count(analysis_word, sort = TRUE)
+```
+
+Manual mapping does not scale to a large vocabulary, but it makes every decision visible.
+
+## Keep negation in context
+
+A word-level lexicon may label `good` as positive. In “not good”, the word is still matched as positive unless we add a context rule. One useful exploratory method is to examine bigrams where the first word is a negator.
+
+```{r}
+negators <- c("not", "no", "never", "without")
+
+bigram_parts |>
+  filter(word1 %in% negators) |>
+  count(word1, word2, sort = TRUE)
+```
+
+This does not fully solve negation. The effect can continue across several words, and grammar can be complex. Still, it helps us inspect phrases that a one-word lexicon may misread.
+
+## Compare counts with rates
+
+Suppose Ottawa has more feedback documents than Montreal. Ottawa may have more mentions of a word only because it has more text. A rate divides a count by a meaningful total.
+
+```{r}
+site_word_rates <- words_no_stop |>
+  count(site, word, name = "word_n") |>
+  group_by(site) |>
+  mutate(
+    site_tokens = sum(word_n),
+    rate_per_1000 = 1000 * word_n / site_tokens
+  ) |>
+  ungroup() |>
+  arrange(site, desc(rate_per_1000))
+
+site_word_rates
+```
+
+A rate per 1,000 tokens supports comparison of word use across text collections of different sizes. It does not correct every difference. A few long responses can still influence a site.
+
+## Keep uncertainty visible
+
+Text rankings can look precise even when counts are very small. A word with one occurrence can receive high TF-IDF if it appears in only one group. Show the raw count beside TF-IDF and use a minimum-frequency rule when appropriate.
+
+```{r}
+topic_tf_idf |>
+  filter(n >= 2) |>
+  group_by(topic) |>
+  slice_max(tf_idf, n = 5, with_ties = FALSE) |>
+  ungroup()
+```
+
+The value `2` is only an example for this tiny teaching data. A real threshold must fit the amount of text and the study purpose.
+
+# More reproducible text-wrangling patterns
+
+## Create a token audit table
+
+An audit table records how many tokens remain after each cleaning step.
+
+```{r}
+audit <- bind_rows(
+  words |>
+    summarise(stage = "all word tokens", tokens = n(), documents = n_distinct(document_id)),
+  words_no_stop |>
+    summarise(stage = "after stop words", tokens = n(), documents = n_distinct(document_id)),
+  analysis_words_clean |>
+    summarise(stage = "after letter filter", tokens = n(), documents = n_distinct(document_id))
+)
+
+audit
+```
+
+This makes the cleaning effect visible. It is more informative than saying only that stop words were removed.
+
+## Preserve token order
+
+Some analyses need the original order of words. Add an index within each document after tokenisation.
+
+```{r}
+ordered_words <- feedback |>
+  unnest_tokens(word, text) |>
+  group_by(document_id) |>
+  mutate(word_id = row_number()) |>
+  ungroup()
+
+ordered_words |>
+  select(document_id, word_id, word)
+```
+
+The word index helps create windows around a term or inspect nearby words.
+
+## Find words near a target term
+
+The following example finds tokens within two positions of `portal` in the same document.
+
+```{r}
+portal_positions <- ordered_words |>
+  filter(word == "portal") |>
+  select(document_id, portal_position = word_id)
+
+ordered_words |>
+  inner_join(portal_positions, by = "document_id") |>
+  filter(abs(word_id - portal_position) <= 2) |>
+  arrange(document_id, portal_position, word_id)
+```
+
+This is a simple context window. It may duplicate rows when a document uses the target word several times. Keep the target position so each window remains identifiable.
+
+## Compare vocabulary between groups
+
+We can find words used at one site but not another with set-style joins.
+
+```{r}
+ottawa_words <- words_no_stop |>
+  filter(site == "Ottawa") |>
+  distinct(word)
+
+toronto_words <- words_no_stop |>
+  filter(site == "Toronto") |>
+  distinct(word)
+
+ottawa_words |>
+  anti_join(toronto_words, by = "word")
+```
+
+With a small sample, unique words may reflect chance. Use counts and document coverage before calling them group characteristics.
+
+## Calculate document frequency
+
+Document frequency is the number of documents containing a word. It is different from total word frequency.
+
+```{r}
+document_frequency <- words_no_stop |>
+  distinct(document_id, word) |>
+  count(word, name = "documents", sort = TRUE)
+
+document_frequency
+```
+
+A word repeated many times in one document has high term frequency but document frequency of one. Both measures can be useful.
+
+## Calculate a simple lexical diversity measure
+
+A type-token ratio divides unique words by all words in a document.
+
+```{r}
+lexical_diversity <- words |>
+  summarise(
+    tokens = n(),
+    types = n_distinct(word),
+    type_token_ratio = types / tokens,
+    .by = document_id
+  )
+
+lexical_diversity
+```
+
+This ratio falls as document length grows, so it should not be used to rank writers or judge language ability. Here it is only a descriptive example for text documents.
+
+# Topic modelling: where tidytext fits
+
+Topic modelling is an unsupervised method that represents documents as mixtures of topics and topics as mixtures of words. The official tidytext topic-modelling article demonstrates tidying results from Latent Dirichlet Allocation models ([tidy topic modelling](https://juliasilge.github.io/tidytext/articles/topic_modeling.html)). A full topic model requires another package and enough text, so this article does not fit a model to the tiny example.
+
+The usual workflow is:
+
+1. create document-term counts;
+2. cast them to a document-term matrix;
+3. fit a model with a package such as `topicmodels`;
+4. use `tidy()` to extract term-topic probabilities;
+5. use `augment()` to connect topic assignments to documents; and
+6. inspect representative text before naming topics.
+
+A topic number has no meaning by itself. A human normally reviews high-probability words and original documents, then chooses a cautious descriptive label. Different model settings can give different results.
+
+The casting step is already reproducible with our example:
+
+```{r}
+topic_input <- words_no_stop |>
+  count(document_id, word) |>
+  cast_dtm(document_id, word, n)
+
+topic_input
+```
+
+Do not fit a model only because a matrix can be created. Topic modelling needs adequate documents, careful preprocessing, sensitivity checks, and interpretation.
+
+# Ethical and practical considerations
+
+## Protect privacy
+
+Text can reveal identity even after direct names are removed. A rare event, location, job, or quotation may identify a person. Before publishing examples, use permitted data, remove unnecessary details, and follow the applicable ethics and privacy process. Synthetic text, as used in this article, is safer for teaching.
+
+## Do not evaluate people from text scores
+
+Word counts and sentiment scores should not be used to score an employee, patient, student, or writer. Lexicons are incomplete and context dependent. A negative word may describe a difficult situation rather than the person writing it.
+
+## Report preprocessing decisions
+
+A reproducible report should state:
+
+- the source and unit of documents;
+- the language of the text;
+- the token type;
+- whether case was changed;
+- which stop-word list was used;
+- any custom removals or word mappings;
+- the sentiment lexicon;
+- the denominator used for group comparisons; and
+- how missing or empty documents were handled.
+
+These choices can change results. They are part of the method, not minor technical details.
+
+## Read concordance examples
+
+A concordance is a set of short contexts around a term. The context-window example above is a simple concordance method. Before explaining a frequent or sentiment-bearing word, read several appearances in the original text. This helps identify negation, sarcasm, names, and alternate meanings.
+
+## Separate exploration from confirmation
+
+Exploratory text analysis helps find patterns and questions. If a pattern becomes an important conclusion, test it with a clear plan, additional data, or careful qualitative review. Do not present a discovered word ranking as if it was a planned confirmatory test.
+
+# Conclusion
+
+The tidytext package makes text analysis fit a familiar tidy workflow. The main step is to convert text into one token per row. After that, we can use `dplyr`, `tidyr`, and `ggplot2` for counting, joining, reshaping, and plotting.
+
+This guide presented 33 practical use cases. We tokenised words, sentences, lines, paragraphs, characters, n-grams, skip n-grams, and regular-expression text. We counted vocabulary, removed stop words, used custom dictionaries, calculated TF-IDF, joined sentiment labels, and created a document-term matrix. We also checked coverage, lost documents, and interpretation risks.
+
+Start with a small sample of your own text. Preserve the original document and its ID. Choose a token that matches the research question. Inspect every transformation. Most importantly, return to the original text before making a conclusion. A careful tidy workflow can organise text, but human judgement is still necessary.
+
+# References
+
+- [tidytext overview](https://juliasilge.github.io/tidytext/)
+- [tidytext function index](https://juliasilge.github.io/tidytext/reference/index.html)
+- [Introduction to tidytext](https://juliasilge.github.io/tidytext/articles/tidytext.html)
+- [Tidying and casting matrices](https://juliasilge.github.io/tidytext/articles/tidying_casting.html)
+- [Tidy topic modelling](https://juliasilge.github.io/tidytext/articles/topic_modeling.html)
+- [CRAN tidytext vignette](https://cran.r-project.org/package=tidytext/vignettes/tidytext.html)

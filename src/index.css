@@ -196,6 +196,16 @@
     @apply border-border;
   }
 
+  /* Keep code operators literal (e.g., render != as !=, not ≠). */
+  code,
+  pre,
+  kbd,
+  samp,
+  .font-mono {
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+
   @keyframes pearlMovement {
     0% { background-position: 8% 10%, 92% 12%, 50% 88%, 18% 72%, 78% 78%, 50% 50%; }
     50% { background-position: 12% 8%, 88% 10%, 52% 84%, 20% 69%, 75% 74%, 46% 54%; }

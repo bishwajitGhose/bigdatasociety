@@ -9,6 +9,50 @@ export interface BlogPost {
   content: string;
 }
 
+function normalizePath(path: string): string {
+  const segments = path.split("/");
+  const out: string[] = [];
+
+  for (const seg of segments) {
+    if (!seg || seg === ".") continue;
+    if (seg === "..") {
+      if (out.length > 0) out.pop();
+      continue;
+    }
+    out.push(seg);
+  }
+
+  return `/${out.join("/")}`;
+}
+
+function resolveContentAssetUrl(
+  postPath: string,
+  rawUrl: string,
+  imageModules: Record<string, string>
+): string {
+  const url = rawUrl.trim().replace(/^['"]|['"]$/g, "");
+
+  // Keep absolute and non-file URLs untouched.
+  if (
+    !url ||
+    /^(https?:)?\/\//i.test(url) ||
+    url.startsWith("data:") ||
+    url.startsWith("mailto:") ||
+    url.startsWith("#")
+  ) {
+    return url;
+  }
+
+  // Public/static paths should remain as-is.
+  if (url.startsWith("/")) return url;
+
+  const postDir = postPath.slice(0, postPath.lastIndexOf("/"));
+  const resolvedSourcePath = normalizePath(`${postDir}/${url}`);
+
+  // Vite returns the final built URL for eager-imported static assets.
+  return imageModules[resolvedSourcePath] || url;
+}
+
 function getCategoryFromPath(path: string): string {
   const parts = path.split("/");
   // e.g. "/src/content/web-dev/frontend/nextjs-routing.md" -> categoryFolder is "frontend"
@@ -49,6 +93,17 @@ export function getBlogPosts(): BlogPost[] {
     }
   ) as Record<string, string>;
 
+  const imageModules = import.meta.glob(
+    [
+      "/src/content/**/*.{png,jpg,jpeg,gif,webp,svg,avif}",
+      "/src/content/**/*.{PNG,JPG,JPEG,GIF,WEBP,SVG,AVIF}"
+    ],
+    {
+      eager: true,
+      import: "default",
+    }
+  ) as Record<string, string>;
+
   const posts: BlogPost[] = [];
 
   // Load dynamic Markdown & Quarto posts
@@ -78,7 +133,17 @@ export function getBlogPosts(): BlogPost[] {
     // Convert raw HTML image tags from rendered qmd/md files into markdown image syntax.
     content = content.replace(
       /<img[^>]*src=["']([^"']+)["'][^>]*>/gi,
-      (_m, src: string) => `![](${src})`
+      (_m, src: string) => `![](${resolveContentAssetUrl(path, src, imageModules)})`
+    );
+
+    // Resolve relative markdown image URLs (common in qmd chart outputs) to built asset URLs.
+    content = content.replace(
+      /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
+      (_m, alt: string, src: string, title?: string) => {
+        const resolved = resolveContentAssetUrl(path, src, imageModules);
+        const titlePart = title ? ` "${title}"` : "";
+        return `![${alt}](${resolved}${titlePart})`;
+      }
     );
 
     const headingMatch = content.match(/^#\s+(.+)$/m);
@@ -89,7 +154,11 @@ export function getBlogPosts(): BlogPost[] {
 
     const imageFromHtml = content.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/i)?.[1];
     const imageFromMarkdown = content.match(/!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/)?.[1];
-    const fallbackImage = imageFromHtml || imageFromMarkdown || "/images/tech-placeholder.jpg";
+    const fallbackImage =
+      resolveContentAssetUrl(path, frontmatter.image || "", imageModules) ||
+      imageFromHtml ||
+      imageFromMarkdown ||
+      "/images/tech-placeholder.jpg";
 
     const firstParagraph = content
       .split(/\r?\n\r?\n/)
@@ -103,7 +172,7 @@ export function getBlogPosts(): BlogPost[] {
       category: frontmatter.category || getCategoryFromPath(path),
       readTime: frontmatter.readTime || "5 min read",
       date: frontmatter.date || "",
-      image: frontmatter.image || fallbackImage,
+      image: fallbackImage,
       content,
     });
   }

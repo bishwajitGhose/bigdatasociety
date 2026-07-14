@@ -1,0 +1,447 @@
+---
+title: "Subsetting and Joining Datasets in R"
+description: "A practical guide to slicing, filtering, and selecting data in R with base R and dplyr, and combining multiple tables correctly with joins — including the mistakes that silently corrupt results."
+author: "Your Name"
+date: today
+categories: [R, data-wrangling, dplyr, tidyverse]
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+execute:
+  warning: false
+  message: false
+---
+
+## Introduction
+
+Almost every real data analysis begins the same way: you have more than one table, and neither table has exactly the rows or columns you actually need. Maybe you have a transactions table and a customers table and need to combine them. Maybe you have a single messy spreadsheet and only want the rows from last quarter, for customers in three specific regions, showing five of its forty columns. These two operations — **subsetting** (extracting a portion of a single dataset) and **joining** (combining two or more datasets based on shared keys) — are so fundamental that most of the mistakes people make in downstream analysis can be traced back to getting one of these two steps wrong earlier in the pipeline.
+
+The trouble is that both operations look deceptively simple. `filter()` and `left_join()` are single function calls, a few words long, easy to write and easy to read. But each one hides real decisions — what happens to rows with `NA` in the filter condition, what happens to rows in one table that have no match in the other, what happens when a "one-to-one" join turns out not to be one-to-one after all — and those decisions determine whether your row count after the operation still means what you think it means. A join that silently duplicates rows, or a filter that silently drops more than you intended, doesn't usually throw an error. It just produces a result that is wrong in a way nobody notices until a total looks off by a factor of three.
+
+This post covers both halves of the problem. We'll start with subsetting: base R's bracket syntax, `dplyr`'s `filter()` and `select()`, and where they differ in subtle but important ways. Then we'll move to joins: the standard mutating joins (`inner_join()`, `left_join()`, `right_join()`, `full_join()`), the filtering joins (`semi_join()`, `anti_join()`), and the diagnostic habits that catch a bad join before it propagates into your results. Throughout, the emphasis is less on syntax memorization and more on the mental model — what row, exactly, ends up in your output, and why.
+
+## Setup and Example Data
+
+```{r}
+library(dplyr)
+library(tibble)
+```
+
+We'll use two small, related tables throughout: an `orders` table and a `customers` table, the classic relational-data setup you'll run into constantly in business analytics, and a reasonable stand-in for almost any "fact table + lookup table" situation.
+
+```{r}
+customers <- tribble(
+  ~customer_id, ~name,      ~region,       ~signup_date,
+  1,            "Alvarez",  "West",        "2021-03-14",
+  2,            "Bianchi",  "East",        "2020-11-02",
+  3,            "Chen",     "West",        "2022-07-19",
+  4,            "Dubois",   "South",       "2019-05-30",
+  5,            "Evans",    "East",        "2023-01-08"
+)
+
+orders <- tribble(
+  ~order_id, ~customer_id, ~amount, ~status,
+  101,       1,            250.00,  "completed",
+  102,       1,            80.50,   "completed",
+  103,       2,            410.25,  "cancelled",
+  104,       3,            15.00,   "completed",
+  105,       6,            99.99,   "completed",  # note: customer_id 6 doesn't exist in `customers`
+  106,       3,            220.00,  "pending"
+)
+
+customers
+orders
+```
+
+Notice that `orders` has a row referencing `customer_id = 6`, which does not appear in `customers` at all — a data-quality issue you will run into constantly with real data (an order placed under a since-deleted account, a foreign key that didn't get backfilled, a typo during data entry). We've included it deliberately, because how each join type handles this exact situation is one of the most important things this post covers.
+
+## Part One: Subsetting
+
+Subsetting means selecting a portion of a single dataset — some rows, some columns, or both — based on a condition or an explicit list.
+
+### Base R: The Bracket Syntax
+
+Base R subsets data frames using `[rows, columns]` syntax. It's worth understanding even if you use `dplyr` for everything day-to-day, because you'll encounter it in other people's code constantly, and because it's genuinely the fastest option for simple, small operations.
+
+```{r}
+# Rows where amount > 100
+orders[orders$amount > 100, ]
+```
+
+```{r}
+# Specific columns only
+orders[, c("order_id", "amount")]
+```
+
+```{r}
+# Both at once: completed orders, order_id and amount columns only
+orders[orders$status == "completed", c("order_id", "amount")]
+```
+
+A few things about this syntax that trip people up:
+
+- **The comma is not optional punctuation, it's the row/column separator.** `orders[orders$amount > 100]` (no comma) does not do what you'd expect — for a data frame, single-bracket indexing without a comma selects *columns*, not rows, because a data frame is technically a list of columns under the hood. This is one of the most common base-R bugs for people coming from other languages.
+- **Dropping to a vector.** If your column selection results in exactly one column, `orders[, "amount"]` returns a plain vector, not a one-column data frame, by default — which can break code downstream that expects a data-frame-shaped object. Adding `drop = FALSE` prevents this: `orders[, "amount", drop = FALSE]`.
+- **`$` versus `[[`.** `orders$amount` and `orders[["amount"]]` both extract a single column as a vector; `$` supports partial matching and tab-completion-friendly typing, while `[["amount"]]` is safer inside functions where the column name might be stored in a variable (`orders[[col_name]]` works; `orders$col_name` does not — it would look for a literal column named `col_name`).
+
+### dplyr: `filter()` and `select()`
+
+`dplyr` splits row-subsetting and column-subsetting into two separate, explicitly named verbs, which is arguably the single biggest readability win over base R's bracket syntax — `filter()` is unambiguously about rows, `select()` is unambiguously about columns, and neither can be confused for the other by a misplaced comma.
+
+```{r}
+orders %>%
+  filter(amount > 100)
+```
+
+```{r}
+orders %>%
+  select(order_id, amount)
+```
+
+```{r}
+orders %>%
+  filter(status == "completed") %>%
+  select(order_id, amount)
+```
+
+### Combining Conditions in `filter()`
+
+Multiple conditions inside a single `filter()` call are combined with `&` (AND) by default — you can either use `&` explicitly or simply separate conditions with a comma, which `dplyr` treats identically:
+
+```{r}
+orders %>%
+  filter(status == "completed", amount > 50)
+```
+
+For OR logic, use `|` explicitly:
+
+```{r}
+orders %>%
+  filter(status == "cancelled" | amount > 200)
+```
+
+A very common real-world need is filtering to a *set* of allowed values, for which `%in%` is almost always the right tool — cleaner and less error-prone than chaining several `==` conditions with `|`:
+
+```{r}
+customers %>%
+  filter(region %in% c("West", "East"))
+```
+
+### The `NA` Trap in Filtering
+
+Here is one of the most consequential subtleties in all of R's filtering behavior, in either base R or `dplyr`: **comparisons involving `NA` return `NA`, not `FALSE`**, and both `[` and `filter()` drop rows where the condition evaluates to `NA` — but they don't necessarily tell you they've done so.
+
+```{r}
+customers_with_na <- customers %>%
+  mutate(region = ifelse(customer_id == 3, NA, region))
+
+customers_with_na
+```
+
+```{r}
+customers_with_na %>%
+  filter(region != "East")
+```
+
+Chen (customer 3) has vanished from the output — not because their region actually fails the `!= "East"` test, but because `NA != "East"` evaluates to `NA`, and `filter()` silently excludes rows where the condition is `NA` rather than `TRUE`. If you actually want to keep rows with missing values alongside rows that pass your condition, you need to say so explicitly:
+
+```{r}
+customers_with_na %>%
+  filter(region != "East" | is.na(region))
+```
+
+This is worth internalizing as a standing habit: any time you filter on a column that might contain `NA`, pause and decide — on purpose — whether missing values should be included or excluded, rather than letting the default silent-drop behavior decide for you. It's a very easy way to lose rows without any warning.
+
+### Row-Number and Slice-Based Subsetting
+
+Sometimes you want rows by position rather than by a logical condition — the first few rows, the last few, a random sample, or the top N by some ranking. `dplyr`'s `slice_*()` family handles all of these cleanly:
+
+```{r}
+orders %>% slice_head(n = 2)          # first 2 rows
+orders %>% slice_max(amount, n = 2)    # 2 highest-amount rows
+orders %>% slice_sample(n = 3)         # 3 random rows
+```
+
+`slice_max()` and `slice_min()` are particularly useful and easy to forget about — they save you from writing `arrange(desc(amount)) %>% slice_head(n = 2)`, and they handle ties more predictably (by default, `slice_max()` will include *all* tied rows at the cutoff unless you set `with_ties = FALSE`, which is worth knowing before it surprises you on a dataset with duplicate values at the boundary).
+
+### Selecting Columns by Pattern
+
+`select()` supports a family of helper functions for choosing columns by name pattern rather than typing every name out, which becomes increasingly valuable as your tables grow wider:
+
+```{r}
+customers %>% select(starts_with("cust"))
+customers %>% select(ends_with("date"))
+customers %>% select(contains("region"))
+customers %>% select(where(is.character))
+```
+
+`where(is.character)` deserves special mention: it lets you select columns based on a *type test* rather than a name pattern, which is genuinely useful when you want, say, "every numeric column" for a summary operation without listing them by hand — and it automatically adapts if columns are added or removed from the source data later, unlike a hardcoded list of names.
+
+You can also drop columns rather than keep them, using a minus sign:
+
+```{r}
+customers %>% select(-signup_date)
+```
+
+### `select()` vs `filter()`: A Common Mix-Up
+
+A specific, very common beginner error is trying to use `select()` to subset rows, or `filter()` to subset columns — since both simply describe "give me part of this dataset," it's easy to reach for the wrong one, especially coming from base R's single-function bracket syntax. Remember: `filter()` always operates on rows and takes logical conditions; `select()` always operates on columns and takes column names or name-pattern helpers. Neither one can do the other's job.
+
+## Part Two: Joining Datasets
+
+Subsetting gets you a portion of one table. Joining combines *two* tables based on matching values in one or more shared "key" columns. This is where a much larger share of real-world data bugs originate, because the mental model of "what row survives, and how many times" is genuinely more complex than subsetting, and the various join types differ from each other in ways that matter enormously for your resulting row count.
+
+### The Four Mutating Joins
+
+`dplyr` provides four core joins that all add columns from one table onto another, differing only in which *rows* survive when a key doesn't match on one side or the other.
+
+```{r}
+inner_join(orders, customers, by = "customer_id")
+```
+
+**`inner_join()`** keeps only rows where the key exists in *both* tables. Notice that order 105 (`customer_id = 6`) disappeared entirely — since customer 6 doesn't exist in `customers`, there's no match, and an inner join drops unmatched rows from both sides.
+
+```{r}
+left_join(orders, customers, by = "customer_id")
+```
+
+**`left_join()`** keeps every row from the *left* table (`orders`, since it's listed first) regardless of whether a match exists in the right table, filling in `NA` for any right-table columns when there's no match. Order 105 is still here, but its `name` and `region` are `NA`. This is the join you reach for by far the most often in practice — "keep all my primary records, and attach whatever extra information exists for them" is the most common real-world join intent.
+
+```{r}
+right_join(orders, customers, by = "customer_id")
+```
+
+**`right_join()`** is the mirror image: keep every row from the right table (`customers`), regardless of whether it has a matching order. Customer 4 (Dubois) and customer 5 (Evans) now appear even though they have no orders at all, with `NA` in the order-specific columns. In practice, `right_join(a, b)` is equivalent to `left_join(b, a)` with the column order swapped — most people default to always using `left_join()` and simply reordering which table comes first, rather than mixing `left_join()` and `right_join()` calls in the same codebase, purely for the sake of consistency and readability.
+
+```{r}
+full_join(orders, customers, by = "customer_id")
+```
+
+**`full_join()`** keeps every row from *both* tables, matched where possible and filled with `NA` on whichever side lacks a corresponding row. This is the join to reach for when you specifically want to audit *both* directions of mismatch at once — unmatched orders and customerless... customers, all in one result — which is exactly the diagnostic use case we'll return to shortly.
+
+### A Mental Model: Venn Diagrams, With a Catch
+
+The classic way these four joins get explained is via a Venn diagram — inner is the intersection, left is the left circle, right is the right circle, full is the union. This mental model is correct and useful, but it has an important limitation: it implicitly assumes each key appears at most once per table. The moment a key is duplicated on either side, the Venn-diagram intuition about *row counts* breaks down, because joins don't just match and discard — they produce the **cross product** of matching rows on each side. This is the single most important thing to understand about joins, and it's the direct cause of most "why do I suddenly have way more rows than I started with" bugs.
+
+### The Row-Multiplication Problem
+
+Let's see this directly. Suppose, due to a data entry error, `customer_id = 1` appears twice in `customers` (perhaps a duplicate signup record):
+
+```{r}
+customers_dup <- bind_rows(
+  customers,
+  tribble(~customer_id, ~name, ~region, ~signup_date,
+          1, "Alvarez", "West", "2021-03-15")  # accidental duplicate
+)
+
+nrow(orders)
+nrow(left_join(orders, customers_dup, by = "customer_id"))
+```
+
+We started with 6 rows in `orders` and ended up with 7 after the join — not because any new orders were added, but because customer 1 had two matching rows in `customers_dup`, and each of customer 1's two orders (101 and 102) got joined against *both* matching customer rows, producing 2 × 2 = 4 output rows for customer 1 alone instead of the expected 2. This is exactly the kind of silent row inflation that later shows up as, say, revenue totals that are mysteriously too high, with no error message anywhere in the pipeline to explain why.
+
+### Checking Join Cardinality Before You Trust the Result
+
+Modern `dplyr` (1.1.0 and later) gives you a direct defense against this: the `relationship` argument on join functions, which lets you *assert* what kind of relationship you expect between the tables and makes the join fail loudly if that assumption is violated, rather than silently multiplying rows.
+
+```{r}
+#| error: true
+left_join(orders, customers_dup, by = "customer_id", relationship = "many-to-one")
+```
+
+Declaring `relationship = "many-to-one"` here (many orders can belong to one customer, but each order should match at most one customer record) causes the join to throw an explicit error the moment that assumption is violated by the duplicated customer row — turning a silent, hard-to-detect bug into a loud, immediate one at exactly the point where it occurs. This is genuinely one of the best small habits you can build into a join-heavy pipeline: whenever you know the intended cardinality of a join (and you almost always do, if you think about your data model for a moment), declare it.
+
+If you don't have access to a `dplyr` version with the `relationship` argument, or just want a quick manual check, comparing row counts before and after the join is a cheap and effective substitute:
+
+```{r}
+n_before <- nrow(orders)
+result <- left_join(orders, customers, by = "customer_id")
+n_after <- nrow(result)
+
+if (n_after != n_before) {
+  warning(sprintf("Row count changed from %d to %d — check for duplicate keys.", n_before, n_after))
+} else {
+  message("Row count unchanged — join looks safe.")
+}
+```
+
+Wrapping this kind of check around joins in a production pipeline, even as a simple `stopifnot()` or logged warning, costs almost nothing and catches an entire category of bug before it reaches a report or a dashboard.
+
+### Filtering Joins: `semi_join()` and `anti_join()`
+
+The four joins above are all **mutating joins** — they add new columns from the right table onto the left. `dplyr` also provides two **filtering joins**, which use a second table only to decide which rows of the *first* table to keep, without adding any of the second table's columns at all. These are underused relative to how often they're the exact right tool.
+
+```{r}
+west_customers <- customers %>% filter(region == "West")
+
+semi_join(orders, west_customers, by = "customer_id")
+```
+
+**`semi_join()`** keeps rows in `orders` that have a matching `customer_id` in `west_customers`, but returns *only orders' own columns* — no customer columns get added. This is exactly what you want when you're using a second table purely as a filter condition, and you'd otherwise be tempted to do a `left_join()` immediately followed by a `select()` to drop the columns you only joined in order to filter on. It's also immune to the row-multiplication problem described above, since `semi_join()` never duplicates rows even if the right-hand table has duplicate keys — each left-table row appears at most once in the output, regardless of how many times its key matches on the right.
+
+```{r}
+anti_join(orders, customers, by = "customer_id")
+```
+
+**`anti_join()`** is the inverse: it keeps rows in `orders` that have **no** match in `customers` — precisely the order (105, for the ghost `customer_id = 6`) we flagged as a data-quality problem back at the start of this post. This makes `anti_join()` one of the single most useful functions for **data auditing**: before trusting the results of any join-heavy pipeline, running an `anti_join()` in both directions tells you exactly which records would be silently dropped (by an inner join) or filled with `NA` (by a left/right join), so you can decide whether that's expected or a sign of an upstream data problem.
+
+```{r}
+# Orders with no matching customer
+anti_join(orders, customers, by = "customer_id")
+
+# Customers with no orders at all
+anti_join(customers, orders, by = "customer_id")
+```
+
+Running both directions of `anti_join()` as a standard pre-join diagnostic step — before you actually commit to whichever mutating join you plan to use — is one of the highest-value habits in this entire post. It takes two lines of code and tells you immediately whether your join is going to quietly lose or quietly pad your data.
+
+### Joining on Multiple Columns, and Columns with Different Names
+
+Real keys are often composite (multiple columns together forming a unique identifier) or named differently across tables. `dplyr`'s `by` argument handles both:
+
+```{r}
+# Multiple-column key
+# left_join(table_a, table_b, by = c("year", "region"))
+
+# Differently-named columns
+# left_join(orders, customers, by = c("cust_id" = "customer_id"))
+```
+
+The named-vector form (`by = c("left_col" = "right_col")`) is worth committing to memory, since mismatched column names across source tables are extremely common in practice (one system calls it `customer_id`, another calls it `cust_id` or `client_no`), and explicitly mapping them in the `by` argument is far safer than renaming columns beforehand and hoping you don't forget to rename them back.
+
+### Base R's `merge()`
+
+Before `dplyr` existed, and still commonly seen in older code and some base-R-only environments, joins were performed with `merge()`:
+
+```{r}
+merge(orders, customers, by = "customer_id")                      # inner join
+merge(orders, customers, by = "customer_id", all.x = TRUE)        # left join
+merge(orders, customers, by = "customer_id", all.y = TRUE)        # right join
+merge(orders, customers, by = "customer_id", all = TRUE)          # full join
+```
+
+`merge()` is perfectly capable of everything `dplyr`'s mutating joins do, controlled via the `all.x`/`all.y`/`all` arguments rather than separate function names, but it has a few practical downsides worth knowing about: it's noticeably slower on large data, it silently re-sorts rows by the join key by default (which `dplyr`'s joins do not do — they preserve left-table row order), and it has no equivalent to `semi_join()`/`anti_join()` built in. Most modern R code uses `dplyr` for joins for these reasons, but recognizing `merge()` on sight matters since you'll run into it in older scripts and Stack Overflow answers.
+
+## Combining Subsetting and Joining in a Real Pipeline
+
+In practice, subsetting and joining are rarely isolated steps — they're woven together in a pipeline. A realistic sequence: filter each table down to what you need, join, then filter or select again on the combined result.
+
+```{r}
+orders %>%
+  filter(status == "completed") %>%
+  left_join(customers, by = "customer_id") %>%
+  filter(region %in% c("West", "East")) %>%
+  select(order_id, name, region, amount)
+```
+
+A subtle but important habit here: filter *before* joining whenever the filter condition only depends on columns already present in one table, rather than joining everything first and filtering afterward. It's not just a performance optimization (though on large tables it matters enormously, since you avoid joining rows you're going to throw away anyway) — it also makes your row-count expectations at each step easier to reason about and easier to debug, since you can check `nrow()` after each individual step and know exactly which operation is responsible for any unexpected change.
+
+## Debugging a Join Step by Step
+
+When a join produces a surprising result, the fastest way to diagnose it is to check three things in order, rather than staring at the final output trying to guess what went wrong:
+
+```{r}
+# 1. Are the key columns actually the same type?
+class(orders$customer_id)
+class(customers$customer_id)
+```
+
+A join between an integer key and a character key (`"1"` vs `1L`) will fail to match anything, often without an obvious error — `dplyr` will generally coerce types and warn you, but relying on that coercion happening correctly is fragile, and it's worth checking explicitly, especially when one table was read from a CSV (where IDs often get parsed as character by default) and another came from a database (where they're typically integer).
+
+```{r}
+# 2. Are there duplicate keys on either side?
+customers %>% count(customer_id) %>% filter(n > 1)
+orders %>% count(customer_id) %>% filter(n > 1)
+```
+
+This directly surfaces the row-multiplication risk discussed earlier, before you even run the join.
+
+```{r}
+# 3. What doesn't match, in each direction?
+anti_join(orders, customers, by = "customer_id")
+anti_join(customers, orders, by = "customer_id")
+```
+
+Between these three checks — matching types, duplicate keys, and unmatched rows in both directions — you can diagnose the overwhelming majority of "this join gave me a weird result" problems in well under a minute, rather than reverse-engineering the issue from a confusing downstream summary table.
+
+## Joining More Than Two Tables
+
+Real pipelines rarely stop at two tables. Suppose we add a third table, `products`, and an `order_items` table linking orders to products:
+
+```{r}
+products <- tribble(
+  ~product_id, ~product_name, ~category,
+  1, "Widget",    "Hardware",
+  2, "Gadget",    "Hardware",
+  3, "Service Plan", "Services"
+)
+
+order_items <- tribble(
+  ~order_id, ~product_id, ~quantity,
+  101, 1, 2,
+  101, 2, 1,
+  102, 3, 1,
+  104, 1, 5
+)
+```
+
+Chaining joins with the pipe operator reads naturally left to right, and it's worth building each step up incrementally rather than writing the whole chain at once, checking `nrow()` after each addition:
+
+```{r}
+orders %>%
+  left_join(order_items, by = "order_id") %>%
+  left_join(products, by = "product_id") %>%
+  left_join(customers, by = "customer_id") %>%
+  select(order_id, name, product_name, quantity, amount)
+```
+
+Two things are worth watching closely in a chain like this. First, order matters for row count, not just readability: joining `order_items` onto `orders` first introduces one row per line item (so order 101, which has two products, now spans two rows before any customer information is even attached), and every join after that point inherits that row multiplication. If you only wanted order-level totals rather than line-item detail, you'd want to aggregate `order_items` down to one row per `order_id` *before* joining it in, not after. Second, `NA` propagates through a chain exactly the way you'd expect — order 105's missing customer record from earlier will still show up as `NA` for `name` here, and order 103, 106 (no matching `order_items` row) will show `NA` for `product_name` and `quantity` — so it's worth running `anti_join()` checks at each stage of a long chain, not just at the very end, since a problem introduced at step two can be much harder to trace once it's buried under three subsequent joins.
+
+## A Brief Note on Performance: `data.table`
+
+Everything in this post has used `dplyr`, which is the right default for most analyses because of its readability. But if you're working with genuinely large tables — tens of millions of rows, joins that take noticeable time to run — it's worth knowing that the `data.table` package implements the same subsetting and joining concepts with substantially better performance, at the cost of a terser, less self-documenting syntax:
+
+```{r}
+library(data.table)
+
+orders_dt <- as.data.table(orders)
+customers_dt <- as.data.table(customers)
+
+# Subsetting: rows, columns
+orders_dt[amount > 100, .(order_id, amount)]
+
+# Joining: data.table uses row-index-style join syntax
+setkey(customers_dt, customer_id)
+customers_dt[orders_dt, on = "customer_id"]
+```
+
+The `[i, j, by]` syntax packs filtering, column selection, and grouped aggregation into a single set of brackets, and its join syntax (`x[y, on = "key"]`) performs something closer to a right join by default (every row of `y` matched against `x`), which is a common point of confusion for people moving between the two packages. The general guidance: reach for `dplyr` by default for its readability and its more explicit, harder-to-misread join functions, and reach for `data.table` specifically when profiling shows that join or aggregation performance is a genuine bottleneck in your pipeline — not preemptively, since the terser syntax trades away some of the self-documenting clarity that makes `dplyr` joins easier to review and debug in the first place.
+
+## Common Pitfalls
+
+**Filtering on a column that contains `NA` without deciding what to do about it.** As shown earlier, both base R and `dplyr` silently drop rows where the filter condition evaluates to `NA` rather than `FALSE`. Always ask, explicitly, whether missing values should pass or fail your filter.
+
+**Assuming a join is one-to-one without checking.** Duplicate keys on either side of a join silently multiply rows rather than throwing an error. Use `relationship = "many-to-one"` (or the appropriate cardinality for your case) on recent `dplyr` versions, or manually compare row counts before and after, every time you join.
+
+**Using `inner_join()` by default and not noticing what got dropped.** An inner join silently discards any row that doesn't have a match on both sides. If you actually need to know what happened to the "losers" of that comparison — orders with no customer, customers with no orders — you need `anti_join()` in both directions, not just the mutating join's row count.
+
+**Confusing `select()` and `filter()`.** `select()` chooses columns; `filter()` chooses rows. This distinction is obvious once internalized but is a very common early mistake, especially for anyone coming from base R's overloaded bracket syntax where a single function handles both.
+
+**Joining on columns with mismatched types or leading/trailing whitespace.** A key stored as `"1002 "` (with a trailing space) will never match `"1002"` in another table, and this kind of issue is invisible when you `print()` or `View()` a data frame — it only surfaces once you notice a join silently failed to match rows you expected it to.
+
+**Forgetting that `merge()` re-sorts by key.** If you migrate old code from `merge()` to `dplyr` joins, or vice versa, be aware that row order is not guaranteed to be preserved the same way between the two — if downstream code depends on row order (it shouldn't, generally, but sometimes does), this switch can introduce a subtle bug.
+
+## Wrapping Up
+
+Subsetting and joining are the two operations you will perform more often than almost anything else in a typical R data analysis, and both are simple enough syntactically that it's easy to underestimate how much can go quietly wrong inside them. The core ideas to carry forward: know whether `NA` values should pass or fail your filters, and say so explicitly rather than relying on the default silent-drop behavior; know the cardinality you expect from a join *before* you run it, and assert it rather than discovering a violation only after your totals look wrong; and treat `anti_join()` as a standing diagnostic tool, not a niche function you reach for occasionally — running it in both directions before trusting a mutating join's output is one of the cheapest, highest-value habits available in the entire `dplyr` toolkit.
+
+Get comfortable with these mechanics, and the rest of a typical data-wrangling pipeline — summarizing, reshaping, visualizing — sits on solid ground, because you'll actually know, with certainty, what each row in your working dataset represents.
+
+## Further Reading
+
+- Wickham, H., Çetinkaya-Rundel, M., & Grolemund, G. — *R for Data Science (2nd edition)*, Chapters on data transformation and joins.
+- `dplyr` documentation on join types: `?dplyr::mutate-joins` and `?dplyr::filter-joins`.
+- The `dplyr` `relationship` argument changelog, for background on why explicit join-cardinality checks were added to the package.
+- Codd, E. F. — the original relational model papers, for readers who want the underlying theory behind why joins behave the way they do.
