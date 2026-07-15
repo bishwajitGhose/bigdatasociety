@@ -44,10 +44,10 @@ export default function Home() {
                 </p>
                 <div className="space-y-4 text-base md:text-lg text-slate-650 leading-relaxed font-light max-w-3xl">
                   <p>
-                    I'm a beginner data analyst who's genuinely obsessed with what data can tell us — from why crops fail in one region and not another, to how hospitals can predict outbreaks before they spread. This site is where I share the projects I've built, the tools I'm learning, and the things I'm figuring out along the way.
+                    I build things with data and code. From wrangling massive and messy datasets, to extracting insights that actually matter, to designing web apps people enjoy using. I connect the dots between raw information and real, working products.
                   </p>
                   <p>
-                    I'm not going to pretend I know everything. I'm learning in public, and I think that's actually a good thing — you get to see real progress, real mistakes, and real growth.
+                    Big data, data science, web development: different tools, same goal — solving real-life problems using the power of data, and presenting the results in a clear, elegant, and accessible manner.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-4 pt-4">
