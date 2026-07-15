@@ -129,10 +129,13 @@ export default function Home() {
               </div>
               <div className="lg:col-span-7 space-y-4 text-slate-600 font-light leading-relaxed text-base md:text-lg">
                 <p>
-                  We're generating more data every single day than existed in all of human history before the internet. That's not a fun fact — it's a huge opportunity, and honestly, a huge responsibility. The organizations (and countries) that figure out how to use that data well are going to solve problems the rest of us are still stuck on.
+                  We create more data in a single day now than existed in all of human history before the internet. That's not just a fun fact to drop at a dinner party, but a massive opportunity, and a massive responsibility too. Whoever figures out how to actually use that data well is going to solve problems the rest of us are still stuck on.
                 </p>
                 <p>
-                  Big Data isn't just a buzzword for tech companies anymore. It's how doctors catch diseases earlier, how farmers know exactly when to plant, how cities cut down traffic, and how we might actually get ahead of the next pandemic instead of reacting to it. I want to be part of that — even in a small way.
+                  Big Data stopped being a tech-company buzzword a while ago. It's how clinicians catch diseases earlier. How farmers know exactly when to plant. How cities untangle their traffic. How we might actually get ahead of the next pandemic instead of scrambling to react once it's already here.
+                </p>
+                <p>
+                  I want to be part of that. Even if it's just in some small way.
                 </p>
               </div>
             </div>
