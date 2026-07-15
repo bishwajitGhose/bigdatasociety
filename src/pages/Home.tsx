@@ -40,7 +40,10 @@ export default function Home() {
                   Hi, I'm Bishwajit 👋
                 </h1>
                 <p className="text-xl md:text-2xl text-teal-600 font-medium tracking-tight">
-                  Big Data & Analytics Enthusiast
+                  Big Data · Data Science · Web Development
+                </p>
+                <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-light -mt-2">
+                  I turn data into decisions, and decisions into products.
                 </p>
                 <div className="space-y-4 text-base md:text-lg text-slate-650 leading-relaxed font-light max-w-3xl">
                   <p>
