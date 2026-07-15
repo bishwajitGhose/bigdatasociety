@@ -86,7 +86,7 @@ export default function Home() {
                 <div className="relative z-10">
                   <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Stack</span>
                   <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
-                    What I'm good at<br />(and still getting better at)
+                    What I love working with
                   </h2>
                 </div>
               </div>
