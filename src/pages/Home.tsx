@@ -80,14 +80,27 @@ export default function Home() {
         {/* ── SECTION 2: SKILLS SUMMARY / TECHNOLOGIES I USE ── */}
         <section className="relative overflow-hidden py-24 border-b border-teal-100 bg-gradient-to-tr from-teal-100/30 via-yellow-50/20 to-emerald-100/30">
           <div className="container max-w-7xl mx-auto px-6 md:px-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+              <div className="lg:col-span-5 relative flex flex-col justify-start">
                 <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-sky-200/60 via-cyan-200/45 to-transparent blur-3xl" />
-                <div className="relative z-10">
-                  <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Stack</span>
-                  <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
-                    What I love working with
-                  </h2>
+                <div className="relative z-10 space-y-6">
+                  <div>
+                    <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Stack</span>
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
+                      What I love working with
+                    </h2>
+                  </div>
+                  
+                  <div className="pt-6 border-t border-teal-200/50">
+                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Tools &amp; Technologies</div>
+                    <div className="flex flex-wrap gap-2">
+                      {["Python", "R", "SQL", "Apache Spark", "Apache Kafka", "MongoDB", "Elasticsearch", "ggplot2", "Power BI", "React", "Next.js", "Node.js", "PostgreSQL", "Git & GitHub"].map((tool) => (
+                        <span key={tool} className="px-3.5 py-1.5 bg-white/70 text-slate-650 hover:text-teal-700 text-xs font-semibold rounded-full border border-teal-100/50 transition-colors shadow-sm">
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="lg:col-span-7 space-y-6 text-slate-600 font-light leading-relaxed">
@@ -97,17 +110,6 @@ export default function Home() {
                 <p>
                   I'm also picking up web development skills (<strong className="font-semibold text-slate-900">React, Next.js, Node.js</strong>) because I want to be able to build and host my own dashboards and tools, not just hand off a Jupyter notebook and hope for the best.
                 </p>
-                
-                <div className="pt-6 border-t border-teal-150 border-teal-200/50">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Tools &amp; Technologies</div>
-                  <div className="flex flex-wrap gap-2">
-                    {["Python", "R", "SQL", "Apache Spark", "Apache Kafka", "MongoDB", "Elasticsearch", "ggplot2", "Power BI", "React", "Next.js", "Node.js", "PostgreSQL", "Git & GitHub"].map((tool) => (
-                      <span key={tool} className="px-3.5 py-1.5 bg-white/70 text-slate-650 hover:text-teal-650 hover:text-teal-700 text-xs font-semibold rounded-full border border-teal-100/50 transition-colors shadow-sm">
-                        {tool}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
