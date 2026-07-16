@@ -83,7 +83,7 @@ function getCategoryFromPath(path: string): string {
 }
 
 export function getBlogPosts(): BlogPost[] {
-  // Discover and read both markdown (.md) and Quarto markdown (.qmd) files recursively
+  // Discover and read both markdown (.md) and Quarto markdown (.qmd) files recursively.
   const modules = import.meta.glob(
     ["/src/content/**/*.md", "/src/content/**/*.qmd"],
     {
@@ -164,6 +164,8 @@ export function getBlogPosts(): BlogPost[] {
       .split(/\r?\n\r?\n/)
       .map((chunk) => chunk.replace(/[#*_`>-]/g, "").trim())
       .find((chunk) => chunk.length > 60);
+
+    console.log("CONTENT_DEBUG:", { path, slug, category: frontmatter.category || getCategoryFromPath(path) });
 
     posts.push({
       slug,

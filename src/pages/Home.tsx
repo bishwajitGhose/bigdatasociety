@@ -115,7 +115,32 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── SECTION 3: WHY BIG DATA IS THE FUTURE ── */}
+        {/* ── SECTION 3: MY PASSION FOR BIG DATA ── */}
+        <section className="relative overflow-hidden py-24 border-b border-teal-100 bg-gradient-to-br from-teal-50/40 via-yellow-105 via-yellow-100/25 to-cyan-50/40">
+          <div className="container max-w-7xl mx-auto px-6 md:px-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
+                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/55 via-cyan-100/40 to-transparent blur-3xl" />
+                <div className="relative z-10">
+                  <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Drive</span>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
+                    Why I got into this in the first place
+                  </h2>
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-6 text-slate-600 font-light leading-relaxed text-base md:text-lg">
+                <p>
+                  My background in healthcare analytics, primarily using R, was the stepping stone that got me into this field. I still remember working with a messy public health dataset, cleaning it, and uncovering a pattern that hadn't been identified before — it simply emerged from the numbers. That moment of clarity, watching a dataset reveal something meaningful, is what drew me in for good.
+                </p>
+                <p>
+                  Since then, I've focused on using data for problems that genuinely matter — healthcare, food security, climate, education, among others. Most of my personal projects gravitate toward real-world, high-impact problems, particularly those affecting developing countries, because that's where I believe rigorous data work can drive meaningful social change.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 4: WHY BIG DATA IS THE FUTURE ── */}
         <section className="relative overflow-hidden py-24 border-b border-teal-100 bg-gradient-to-r from-yellow-100/35 via-emerald-50/20 to-cyan-100/35">
           <div className="container max-w-7xl mx-auto px-6 md:px-10 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -136,31 +161,6 @@ export default function Home() {
                 </p>
                 <p>
                   I want to be part of that. Even if it's just in some small way.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION 4: MY PASSION FOR BIG DATA ── */}
-        <section className="relative overflow-hidden py-24 border-b border-teal-100 bg-gradient-to-br from-teal-50/40 via-yellow-105 via-yellow-100/25 to-cyan-50/40">
-          <div className="container max-w-7xl mx-auto px-6 md:px-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-5 relative min-h-[260px] flex items-center">
-                <div className="absolute -left-8 top-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/55 via-cyan-100/40 to-transparent blur-3xl" />
-                <div className="relative z-10">
-                  <span className="text-xs font-bold text-teal-600 uppercase tracking-widest">Drive</span>
-                  <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mt-2 leading-tight">
-                    Why I got into this in the first place
-                  </h2>
-                </div>
-              </div>
-              <div className="lg:col-span-7 space-y-6 text-slate-600 font-light leading-relaxed text-base md:text-lg">
-                <p>
-                  Honestly? I got hooked the first time I pulled a messy public health dataset, cleaned it up, and saw a pattern nobody had pointed out to me — it just showed up in the numbers. That feeling of "oh wait, THAT'S what's actually happening" is addictive.
-                </p>
-                <p>
-                  I care a lot about using data for things that matter — health, food security, climate, education — not just ad clicks and sales funnels (though I get why those matter too). Most of my personal projects lean toward real-world, real-impact problems, especially ones affecting developing countries, because that's where I think good data work can genuinely change outcomes for people.
                 </p>
               </div>
             </div>
@@ -195,10 +195,10 @@ export default function Home() {
 
         {/* ── SECTION 6: FEATURED PROJECTS ── */}
         <div 
-          className="py-24 bg-fixed bg-cover bg-center bg-no-repeat relative"
+          className="py-24 bg-fixed bg-cover bg-center bg-no-repeat relative !shadow-none !border-none"
           style={{ backgroundImage: `url('https://images.unsplash.com/photo-1774209989331-aea1148b6018?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')` }}
         >
-          <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/20 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(15,23,42,0.2)] backdrop-blur-[2px] !border-none !shadow-none" />
           <div className="container max-w-7xl mx-auto px-6 md:px-10 relative z-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
               <div>
@@ -257,7 +257,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-4">
               <div>
                 <span className="text-xs font-bold text-teal-700 uppercase tracking-widest">Writing</span>
-                <h2 className="text-3xl font-black text-slate-900 mt-2">What I've been writing about lately</h2>
+                <h2 className="text-3xl font-black text-slate-900 mt-2">Here are some of my recent articles</h2>
               </div>
               <Button asChild variant="link" className="text-teal-600 hover:text-teal-800 font-bold self-start p-0">
                 <Link href="/blog">Read All Articles <ArrowRight className="w-4 h-4 ml-1" /></Link>
